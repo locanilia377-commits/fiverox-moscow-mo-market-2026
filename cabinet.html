@@ -23,7 +23,7 @@
 .sidebar{overflow-y:auto;overscroll-behavior:contain}.source-detail a,.public-evidence a,.research-card a{overflow-wrap:anywhere}
 
 @font-face{font-family:Onest;src:url("onest-crm.woff2") format("woff2");font-display:swap}body,button,input,select,textarea{font-family:Onest,Arial,sans-serif}.sidebar{background:#064c40}.btn.primary{background:#087d65}.brand{font-weight:850;letter-spacing:.04em}.brand span{font-size:10px}.scope-note{border-color:#b6daca;background:#edf8f1;color:#1e594c}
-</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261117-r15-email-recovery-20261119-mail-delivery-20261119-r3"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
+</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261117-r15-email-recovery-20261119-mail-delivery-20261119-r3-qualification-20261123"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}.lead-queue-stats{grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))}.lead-qualification{margin-bottom:16px}.lead-qualification .qualification-controls{margin-bottom:7px}.lead-qualification .meta{margin:0}.qualification-label{display:block;margin:5px 0}.qualification-label .pill{white-space:normal}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <style>.public-catalog { min-width: 0; padding: 24px clamp(14px, 3vw, 32px) 40px; }
 .public-catalog-header h1 { margin: 0 0 16px; font-size: clamp(1.5rem, 3vw, 2rem); }
@@ -308,6 +308,53 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 const moneyFormat = new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2});
 function countLabel(n,one,few,many){const a=Math.abs(n)%100,b=a%10;return integerFormat.format(n)+' '+(a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many);}
 const closedStages=new Set(['Клиент','Отказ']);
+
+const confirmedServiceProfiles = new Set(['Оклейка', 'Тонировка', 'Обе услуги']);
+const qualificationOrder = {ready:0, confirmed:1, candidate:2};
+
+function qualificationFor(lead) {
+  if (!confirmedServiceProfiles.has(String(lead.profile ?? '').trim())) return 'candidate';
+  return /\d(?:[\s()+-]*\d){9}/.test(String(lead.phones ?? '')) ? 'ready' : 'confirmed';
+}
+
+function leadQueueCounts(leads) {
+  const totals = {all:leads.length, ready:0, confirmed:0, candidate:0, fresh:0, active:0, assigned:0};
+  for (const lead of leads) {
+    const qualification = qualificationFor(lead);
+    totals[qualification]++;
+    if (lead.stage === 'Новый') totals.fresh++;
+    else if (lead.stage && !closedStages.has(lead.stage)) totals.active++;
+    if (!closedStages.has(lead.stage) && String(lead.manager ?? '').trim()) totals.assigned++;
+  }
+  totals.confirmed += totals.ready;
+  return totals;
+}
+
+function matchesQualification(lead, filter) {
+  const value = qualificationFor(lead);
+  return filter === 'all' || filter === value || (filter === 'confirmed' && value === 'ready');
+}
+
+function priorityLabel(lead) {
+  const value = qualificationFor(lead);
+  if (value === 'ready') return pill('К обзвону', 'green');
+  if (value === 'confirmed') return pill('Услуга подтверждена · нужен телефон', 'blue');
+  return pill('Кандидат', 'orange');
+}
+
+function qualificationControls(counts) {
+  const options = [['all','Все'],['ready','К обзвону'],['confirmed','Подтверждённые'],['candidate','Кандидаты']];
+  const buttons = options.map(([id,label]) => `<button type="button" class="btn ${filterQualification===id?'primary':''}" data-action="lead-qualification" data-qualification="${id}" aria-pressed="${filterQualification===id}">${label} · ${count(counts[id])}</button>`).join('');
+  return `<div class="lead-qualification"><div class="geo-selector qualification-controls" role="group" aria-label="Квалификация заявок">${buttons}</div><p class="meta">К обзвону — услуга подтверждена источником, в карточке есть телефон. У кандидатов услугу нужно проверить.</p></div>`;
+}
+
+function leadQueueStats(queue, metrics, customers) {
+  const overdue = stat('Просроченные контакты',count(metrics.overdueCards.length),'Карточки с датой в прошлом',metrics.overdueCards.length?'attention':'');
+  const total = stat('Всего карточек',count(queue.all),'По выбранной территории','accent');
+  if (customers) return `<div class="stats">${total}${stat('Клиенты',count(metrics.clients),'Этап «Клиент»')}${overdue}</div>`;
+  return `<div class="stats lead-queue-stats">${total}${stat('Новые',count(queue.fresh),'Этап «Новый»')}${stat('Назначены',count(queue.assigned),'Есть ответственный')}${stat('В работе',count(queue.active),'Рабочие этапы после «Новый»')}${overdue}</div>`;
+}
+
 const closedActivities=new Set(['completed','cancelled','issued','returned']);
 function asNumber(value){const n=Number(value);return Number.isFinite(n)?n:0;}
 function localDateTimeInput(value){const date=new Date(value);if(!Number.isFinite(date.getTime()))return '';const pad=n=>String(n).padStart(2,'0');return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;}
@@ -323,7 +370,7 @@ function metrics(db){
   const cohorts=[];
   for(const [leadId,rows] of clientSales){const ordered=[...rows].sort((a,b)=>a.date.localeCompare(b.date));const first=ordered[0].date;const complete=Boolean(first&&dayPlus(first,60)<=today);const repeat=ordered.slice(1).some(s=>s.date<=dayPlus(first,60));cohorts.push({leadId,first,complete,repeat,count:rows.length,revenue:rows.reduce((n,s)=>n+saleAmount(s),0)});}
   const complete=cohorts.filter(c=>c.complete), repeated=complete.filter(c=>c.repeat);
-  return {total:leads.length,active:leads.filter(l=>!closedStages.has(l.stage)).length,clients:leads.filter(l=>l.stage==='Клиент').length,declined:leads.filter(l=>l.stage==='Отказ').length,overdueCards:leads.filter(l=>l.due&&l.due<today&&!closedStages.has(l.stage)),overdueActions:activities.filter(a=>isOverdue(a,today)),openActions:activities.filter(a=>!closedActivities.has(a.status)),revenue:sales.reduce((n,s)=>n+saleAmount(s),0),sales,cohorts,buyers:cohorts.length,rr:complete.length?Math.round(repeated.length/complete.length*1000)/10:null,rrBase:complete.length,rrRepeats:repeated.length};
+  return {total:leads.length,clients:leads.filter(l=>l.stage==='Клиент').length,declined:leads.filter(l=>l.stage==='Отказ').length,overdueCards:leads.filter(l=>l.due&&l.due<today&&!closedStages.has(l.stage)),overdueActions:activities.filter(a=>isOverdue(a,today)),openActions:activities.filter(a=>!closedActivities.has(a.status)),revenue:sales.reduce((n,s)=>n+saleAmount(s),0),sales,cohorts,buyers:cohorts.length,rr:complete.length?Math.round(repeated.length/complete.length*1000)/10:null,rrBase:complete.length,rrRepeats:repeated.length};
 }
 function monthlyRevenue(sales,today,months=6){const current=new Date(today+'T12:00:00Z');const rows=[];for(let i=months-1;i>=0;i--){const date=new Date(Date.UTC(current.getUTCFullYear(),current.getUTCMonth()-i,1,12));const key=date.toISOString().slice(0,7);rows.push({month:key,amount:sales.filter(s=>isConfirmedSale(s)&&s.date.startsWith(key)).reduce((n,s)=>n+saleAmount(s),0)});}return rows;}
 function nextActivity(activity,today){const base=activity.occurredAt||activity.due||today,interval=Number(activity.repeatDays)||0;if(interval<1)return null;const {id,createdAt,createdBy,updatedAt,updatedBy,...record}=activity;return {...record,status:'planned',due:dayPlus(base,interval),occurredAt:'',result:''};}
@@ -439,7 +486,7 @@ const table=(headers,rows)=>rows.length?`<div class="table-wrap"><table class="d
 const leadButton=leadId=>{const l=db?.leads.find(l=>l.id===leadId);return `<button type="button" class="company-button" data-action="open-card" data-id="${esc(leadId)}">${esc(l?.name||'Карточка недоступна')}</button>`;};
 const rowCompany=l=>`${moveAwareLeadButton(l)}<div class="sub">${esc(l.city||'Город не указан')} · ${esc(l.profile||'Услуги не указаны')}</div>`;
 const safeUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'?u.href:'';}catch{return '';}};
-let session=null,viewId=0,requestId=0,cardRequestId=0,db=null,current=null,screen='leads',mode='board',query='',filterStage='',filterDue='',filterManager='',itemStatus='',saving=false,loading=false,drawerTab='overview',focusReturn=null,modal=null,dragged=null;
+let session=null,viewId=0,requestId=0,cardRequestId=0,db=null,current=null,screen='leads',mode='board',query='',filterStage='',filterDue='',filterManager='',filterQualification='all',itemStatus='',saving=false,loading=false,drawerTab='overview',focusReturn=null,modal=null,dragged=null;
 let emailProof='',emailAddress='',emailResendTimer,emailResendUntil=0,toastTimer;
 const pendingOperations=new Map();
 const abandoned=new Error('Запрос отменён.');
@@ -493,7 +540,12 @@ function duePill(due,closed=false){return due?pill(day(due),!closed&&due<db.toda
 function leadMatches(l){const q=query.toLocaleLowerCase('ru');return (!q||[l.name,l.city,l.id,l.profile,l.phones,l.manager].some(v=>String(v||'').toLocaleLowerCase('ru').includes(q)))&&(!filterStage||l.stage===filterStage||pendingMoves.has(l.id))&&(!filterManager||l.manager===filterManager)&&(!filterDue||(filterDue==='none'&&!l.due)||(filterDue==='today'&&l.due===db.today)||(filterDue==='late'&&l.due&&l.due<db.today&&!closedStages.has(l.stage))||(filterDue==='planned'&&l.due>db.today));}
 function leadFilters(){const managers=[...new Set(db.leads.map(l=>l.manager).filter(Boolean))].sort();return `<select id="stageFilter" aria-label="Этап">${option('','Все этапы',filterStage)}${options(db.stages,filterStage)}</select><select id="managerFilter" aria-label="Ответственный">${option('','Все ответственные',filterManager)}${options(managers,filterManager)}</select><select id="dueFilter" aria-label="Следующий контакт">${options([['','Любой срок'],['late','Просрочено'],['today','Сегодня'],['planned','Запланировано'],['none','Без даты']],filterDue)}</select>`;}
 
-function renderLeads(customers=false){const baseLeads=db.leads.filter(l=>customers?l.kind==='customer':l.kind!=='customer'),m=metrics({...db,leads:baseLeads}),matches=baseLeads.filter(leadMatches);return heading(customers?'Клиенты и точки':'Заявки',customers?'Компании на этапе «Клиент» и регулярное сопровождение':'Входящие компании и первый контакт',(isStaff()?btn(customers?'Добавить точку':'+ Новая заявка','new-lead',`data-write data-kind="${customers?'customer':'inquiry'}"`,'primary'):'')+(!customers&&session?.role==='coordinator'?btn('Массовое назначение','bulk-assignment','data-write'):'') )+`<div class="stats">${stat('Всего карточек',count(m.total),'Единая база компаний','accent')}${stat('В работе',count(m.active),'Открытые этапы воронки')}${stat('Клиенты',count(m.clients),'Этап «Клиент»')}${stat('Просроченные контакты',count(m.overdueCards.length),'Открытые карточки с датой в прошлом',m.overdueCards.length?'attention':'')}</div>`+(customers?'':`<div class="views" role="group" aria-label="Вид заявок"><button class="view-button ${mode==='board'?'active':''}" data-action="view-board" aria-pressed="${mode==='board'}">▦ Канбан</button><button class="view-button ${mode==='list'?'active':''}" data-action="view-list" aria-pressed="${mode==='list'}">☷ Список</button></div>`)+searchToolbar(leadFilters(),matches.length)+(customers||mode==='list'?`<section class="box table-box">${table(['Компания / точка','Этап','Ответственный','Следующий контакт','Следующий шаг','Оценка сделки'],matches.map(l=>[rowCompany(l),stagePill(l.stage),esc(l.manager||'Не назначен'),duePill(l.due,closedStages.has(l.stage)),esc(l.next||'—'),l.amount?money(l.amount):'—']))||empty('Карточки не найдены','Измените поиск или фильтры.')}</section>`:`${canEdit()?'<p class="selection-info">Перетаскивайте карточки между этапами. На телефоне этап можно изменить внутри карточки.</p>':''}<section class="board" aria-label="Воронка заявок" tabindex="0">${db.stages.map((stage,index)=>{const ls=matches.filter(l=>l.stage===stage);return `<div class="column" data-stage="${esc(stage)}" style="--stage:${colors[index%colors.length]}"><header class="column-head"><span>${esc(stage)}</span><span>${ls.length}</span></header>${ls.map(leadCard).join('')||'<div class="empty-column">Карточек пока нет</div>'}</div>`;}).join('')}</section>`);}
+function renderLeads(customers=false){const baseLeads=db.leads.filter(l=>customers?l.kind==='customer':l.kind!=='customer'),m=metrics({...db,leads:baseLeads}),queue=leadQueueCounts(baseLeads);let matches=baseLeads.filter(leadMatches);
+  if (!customers) {
+    matches = matches.filter(lead => matchesQualification(lead, filterQualification));
+    matches.sort((a,b) => qualificationOrder[qualificationFor(a)] - qualificationOrder[qualificationFor(b)]);
+  }
+  return heading(customers?'Клиенты и точки':'Заявки',customers?'Компании на этапе «Клиент» и регулярное сопровождение':'Входящие компании и первый контакт',(isStaff()?btn(customers?'Добавить точку':'+ Новая заявка','new-lead',`data-write data-kind="${customers?'customer':'inquiry'}"`,'primary'):'')+(!customers&&session?.role==='coordinator'?btn('Массовое назначение','bulk-assignment','data-write'):'') )+leadQueueStats(queue,m,customers)+(customers?'':qualificationControls(queue))+(customers?'':`<div class="views" role="group" aria-label="Вид заявок"><button class="view-button ${mode==='board'?'active':''}" data-action="view-board" aria-pressed="${mode==='board'}">▦ Канбан</button><button class="view-button ${mode==='list'?'active':''}" data-action="view-list" aria-pressed="${mode==='list'}">☷ Список</button></div>`)+searchToolbar(leadFilters(),matches.length)+(customers||mode==='list'?`<section class="box table-box">${table(['Компания / точка','Этап','Ответственный','Следующий контакт','Следующий шаг','Оценка сделки'],matches.map(l=>[rowCompany(l)+(customers?'':`<div class="qualification-label">${priorityLabel(l)}</div>`),stagePill(l.stage),esc(l.manager||'Не назначен'),duePill(l.due,closedStages.has(l.stage)),esc(l.next||'—'),l.amount?money(l.amount):'—']))||empty('Карточки не найдены','Измените поиск или фильтры.')}</section>`:`${canEdit()?'<p class="selection-info">Перетаскивайте карточки между этапами. На телефоне этап можно изменить внутри карточки.</p>':''}<section class="board" aria-label="Воронка заявок" tabindex="0">${db.stages.map((stage,index)=>{const ls=matches.filter(l=>l.stage===stage);return `<div class="column" data-stage="${esc(stage)}" style="--stage:${colors[index%colors.length]}"><header class="column-head"><span>${esc(stage)}</span><span>${ls.length}</span></header>${ls.map(leadCard).join('')||'<div class="empty-column">Карточек пока нет</div>'}</div>`;}).join('')}</section>`);}
 function matchItem(item){const lead=db.leads.find(l=>l.id===item.leadId),q=query.toLocaleLowerCase('ru');return (!itemStatus||item.status===itemStatus)&&(!q||[lead?.name,lead?.city,item.id,item.title,item.item,item.dealer,item.manager,item.result].some(v=>String(v||'').toLocaleLowerCase('ru').includes(q)));}
 function itemFilter(statuses){return `<select id="itemStatus" aria-label="Статус">${option('','Все статусы',itemStatus)}${statuses.map(s=>option(s,statusLabels[s],itemStatus)).join('')}</select>`;}
 function renderActivities(kind=''){const titles={task:'План действий',visit:'Посещения',test:'Тесты пленок',equipment:'Оборудование'},subs={task:'Независимые цели, сроки и исполнители по каждой точке',visit:'План и факт посещений, результаты и следующая дата',test:'Плёнка, тестирование, обратная связь и следующий шаг',equipment:'Потребность, договор, выдача и возврат'},type=kind||'task';const items=db.activities.filter(a=>(!kind||a.kind===kind)&&matchItem(a)).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));const all=db.activities.filter(a=>!kind||a.kind===kind),open=all.filter(a=>!closedActivities.has(a.status)),late=open.filter(a=>isOverdue(a,db.today));const actionLabel={task:'Целевое действие',visit:'Запланировать посещение',test:'Новый тест',equipment:'Новая потребность'}[type];const statuses=kind==='equipment'?['planned','issued','returned','cancelled']:!kind?['planned','in_progress','completed','issued','returned','cancelled']:['planned','in_progress','completed','cancelled'];return heading(titles[type],subs[type],canEdit()?btn('+ '+actionLabel,'new-activity',`data-kind="${type}" data-write`,'primary'):'')+`<div class="stats">${stat('Всего',count(all.length),'Записано в CRM','accent')}${stat('Открыто',count(open.length),'Запланировано и в работе')}${stat('Завершено',count(all.filter(a=>closedActivities.has(a.status)&&a.status!=='cancelled').length),'Результат зафиксирован')}${stat('Просрочено',count(late.length),'Требуют внимания',late.length?'attention':'')}</div>`+searchToolbar(itemFilter(statuses),items.length)+`<section class="box table-box">${table(['Действие','Точка','Срок / факт','Исполнитель','Статус','Периодичность',''],items.map(a=>[`${esc(a.title)}<div class="sub">${esc(activityNames[a.kind])}</div>`,leadButton(a.leadId),`${duePill(a.due,closedActivities.has(a.status))}${a.occurredAt?`<div class="sub">Факт: ${fullDay(a.occurredAt)}</div>`:''}`,esc(a.manager||'Не назначен'),activityPill(a),a.repeatDays?esc(a.repeatDays)+' дней':'Разовое',btn('Открыть','edit-item',`data-kind="activity" data-id="${esc(a.id)}"`,'small')]))||empty('Действий пока нет','Добавьте первое действие по клиенту.',canEdit()?btn(actionLabel,'new-activity',`data-kind="${type}" data-write`,'primary'):'')}</section>`+(kind==='equipment'?'<div class="note warning">Выдача оборудования требует заполненного договора. Оборудование учитывается отдельно от продаж материалов.</div>':'');}
@@ -556,6 +608,12 @@ document.addEventListener('click',async event=>{const button=event.target.closes
   if(action==='edit-user')return openUser(db.users.find(u=>u.email===button.dataset.email));
   if(action==='refresh'){try{await loadWorkspace(true);}catch{}return;}
   if(action==='open-card'){if($('editorDialog').open){if(!discardChanges())return;closeModal(true);}return openCard(button.dataset.id);}
+  if(action==='lead-qualification'){
+    filterQualification=button.dataset.qualification;
+    render();
+    document.querySelector(`[data-action="lead-qualification"][data-qualification="${filterQualification}"]`)?.focus();
+    return;
+  }
   if(action==='view-board'||action==='view-list'){mode=action==='view-board'?'board':'list';rememberCrmView();return render();}
   if(action==='reload-survey')return loadClientSurvey();
   if(action==='card-tab'){if(drawerTab===button.dataset.tab||!discardChanges())return;drawerTab=button.dataset.tab;if(drawerTab==='survey')return loadClientSurvey();if(drawerTab==='history'&&current?._historyStale)return loadCardHistory();return renderDrawer();}
@@ -594,7 +652,7 @@ function render(){
   const full=db;
   if(db)db=scopedDatabase(db);
   try{renderRaw();}finally{db=full;}
-  if(session&&full&&screen!=='access'&&!isPublic(screen))$('main').insertAdjacentHTML('afterbegin',`<div class="geo-selector" role="group" aria-label="Территория CRM">${[['all','Московская область'],['city','Москва'],['rest','Московская область без Москвы']].map(([id,label])=>`<button type="button" class="btn ${geoScope===id?'primary':''}" data-action="geo" data-scope="${id}" aria-pressed="${geoScope===id}">${label}</button>`).join('')}<span class="meta">${geoScope==='rest'?'Карточки без установленного города исключены.':'Одна база · Москва выделена без двойного счёта'}</span></div>`);
+  if(session&&full&&screen!=='access'&&!isPublic(screen))$('main').insertAdjacentHTML('afterbegin',`<div class="geo-selector" role="group" aria-label="Территория CRM">${[['all','Москва и Московская область'],['city','Москва'],['rest','Московская область без Москвы']].map(([id,label])=>`<button type="button" class="btn ${geoScope===id?'primary':''}" data-action="geo" data-scope="${id}" aria-pressed="${geoScope===id}">${label}</button>`).join('')}<span class="meta">${geoScope==='rest'?'Карточки без установленного города исключены.':'Одна база · Москва выделена без двойного счёта'}</span></div>`);
 }
 function renderAccess(){
   if(session?.role!=='admin')return empty('Доступ ограничен','Сотрудников добавляет владелец.');
@@ -739,7 +797,7 @@ function leadCard(lead) {
   const move = pendingMoves.get(lead.id);
   const uncertain = move?.state === 'uncertain';
   const status = uncertain ? 'Этап не подтвержден · нажмите, чтобы повторить' : 'Сохраняется этап…';
-  return `<button type="button" class="lead-card${move?' pending-move':''}${uncertain?' move-uncertain':''}" data-action="${uncertain?'retry-move':'open-card'}" data-id="${esc(lead.id)}" draggable="${canEdit()&&!saving&&!move}" ${move&&!uncertain?'disabled aria-busy="true"':''}><h3>${esc(lead.name)}</h3>${move?`<span class="move-status" role="status">${status}</span>`:''}<span class="profile-label">${esc(lead.profile||'Услуги не указаны')}</span><p>${esc(lead.city||'Город не указан')}</p>${lead.next?`<p>${esc(lead.next)}</p>`:''}${lead.due?`<div class="due-pill">${duePill(lead.due,closedStages.has(lead.stage))}</div>`:''}<div class="lead-card-footer"><strong>${esc(lead.manager||'Не назначен')}</strong><span>${lead.amount?money(lead.amount):'Без оценки'}</span></div></button>`;
+  return `<button type="button" class="lead-card${move?' pending-move':''}${uncertain?' move-uncertain':''}" data-action="${uncertain?'retry-move':'open-card'}" data-id="${esc(lead.id)}" draggable="${canEdit()&&!saving&&!move}" ${move&&!uncertain?'disabled aria-busy="true"':''}><h3>${esc(lead.name)}</h3>${move?`<span class="move-status" role="status">${status}</span>`:''}<span class="profile-label">${esc(lead.profile||'Услуги не указаны')}</span><span class="qualification-label">${priorityLabel(lead)}</span><p>${esc(lead.city||'Город не указан')}</p>${lead.next?`<p>${esc(lead.next)}</p>`:''}${lead.due?`<div class="due-pill">${duePill(lead.due,closedStages.has(lead.stage))}</div>`:''}<div class="lead-card-footer"><strong>${esc(lead.manager||'Не назначен')}</strong><span>${lead.amount?money(lead.amount):'Без оценки'}</span></div></button>`;
 }
 
 function moveAwareLeadButton(lead) {
@@ -1059,6 +1117,7 @@ async function navigate(next, {fromHistory=false}={}) {
   if (!isPublic(screen)) {
     if (!fromPublic) {
       query = itemStatus = filterStage = filterDue = filterManager = '';
+      filterQualification = 'all';
     }
     lastCrmScreen = screen;
     rememberCrmView();
