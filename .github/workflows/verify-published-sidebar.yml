@@ -14,7 +14,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/sidebar-browser"
           "$RUNNER_TEMP/sidebar-browser/bin/pip" -q install selenium==4.32.0
           "$RUNNER_TEMP/sidebar-browser/bin/python" - <<'PY'
-          import os
+          import base64, os
           from pathlib import Path
           from urllib.parse import urlsplit, parse_qs
           from selenium import webdriver
@@ -41,12 +41,12 @@ jobs:
           try:
               for width,height in [(1440,1120),(390,844)]:
                   driver.set_window_size(width,height)
-                  driver.execute_cdp_cmd("Emulation.setDeviceMetricsOverride",{"width":width,"height":height,"deviceScaleFactor":1,"mobile":width<600})
+                  driver.execute_cdp_cmd("Emulation.setDeviceMetricsOverride",{"width":width,"height":height,"deviceScaleFactor":2,"mobile":width<600})
                   for area,num in [("region","1124"),("moscow","1127")]:
-                      url = site+"?area="+area+"&v=r14#crm"
+                      url = site+"?area="+area+"&v=r15#crm"
                       driver.get(url)
                       ready.until(visible_links)
-                      assert driver.find_element(By.CSS_SELECTOR,'meta[name="build"]').get_attribute("content") == "moscow-mo-20261128-r14"
+                      assert driver.find_element(By.CSS_SELECTOR,'meta[name="build"]').get_attribute("content") == "moscow-mo-20261128-r15"
                       links = driver.find_elements(By.CSS_SELECTOR,".catalog-nav [data-crm-route]")
                       assert [link.get_attribute("data-crm-route") for link in links] == routes
                       actual = [link.find_elements(By.XPATH,"./span")[1].get_attribute("textContent").strip() for link in links]
@@ -61,21 +61,26 @@ jobs:
                       else:
                           assert nav.rect["y"] + nav.rect["height"] <= results.rect["y"]+1
                           assert driver.execute_script("return document.documentElement.scrollWidth <= window.innerWidth")
-                      nav.screenshot(str(out/(area+"-"+str(width)+".png")))
+                      access_symbol = links[11].find_element(By.CSS_SELECTOR,"svg")
+                      assert access_symbol.rect["width"] == 16 and access_symbol.rect["height"] == 16
+                      clip = driver.execute_script("const e=arguments[0].getBoundingClientRect();return {x:e.x+scrollX,y:e.y+scrollY,width:e.width,height:e.height,scale:1}",nav)
+                      photo = driver.execute_cdp_cmd("Page.captureScreenshot", {"format":"png","captureBeyondViewport":True,"clip":clip})
+                      (out/(area+"-"+str(width)+".png")).write_bytes(base64.b64decode(photo["data"]))
                       links[0].click()
                       assert driver.switch_to.active_element.get_attribute("id") == "catalogQuery"
-                      if width==1440:
-                          for route in routes[1:]:
-                              driver.find_element(By.CSS_SELECTOR,'a[data-crm-route="'+route+'"]').click()
-                              ready.until(lambda b:b.execute_script("return document.querySelector(\'#nav [aria-current=page]\')?.dataset.screen") == route)
-                              current = urlsplit(driver.current_url)
-                              assert current.fragment==route and parse_qs(current.query)["area"]==[area]
-                              assert driver.find_element(By.ID,"authScreen").is_displayed()
-                              if route=="leads":
-                                  assert len(driver.find_elements(By.CSS_SELECTOR,"#nav [data-screen]"))==14
-                              driver.back()
-                              ready.until(visible_links)
-                      else:
+                      for route in routes[1:]:
+                          driver.find_element(By.CSS_SELECTOR,'a[data-crm-route="'+route+'"]').click()
+                          ready.until(lambda b:b.execute_script("return document.querySelector(\'#nav [aria-current=page]\')?.dataset.screen") == route)
+                          current = urlsplit(driver.current_url)
+                          assert current.fragment==route and parse_qs(current.query)["area"]==[area]
+                          assert driver.find_element(By.ID,"authScreen").is_displayed()
+                          if route=="access":
+                              assert driver.find_element(By.CSS_SELECTOR,'#nav [data-screen="access"] svg').is_displayed() or width<600
+                          if route=="leads":
+                              assert len(driver.find_elements(By.CSS_SELECTOR,"#nav [data-screen]"))==14
+                          driver.back()
+                          ready.until(visible_links)
+                      if width<600:
                           driver.find_element(By.CSS_SELECTOR,'a[data-crm-route="leads"]').click()
                           ready.until(lambda b:b.find_element(By.ID,"authScreen").is_displayed())
                           driver.find_element(By.ID,"menuToggle").click()
@@ -91,7 +96,10 @@ jobs:
                           ready.until(lambda b:b.execute_script("""const e=document.querySelector('#nav [data-screen=coordinator-guide]');const r=e.getBoundingClientRect();return r.top>=0 && r.bottom<=innerHeight+1 && !!document.elementFromPoint(r.x+r.width/2,(r.top+r.bottom)/2)?.closest('[data-screen=coordinator-guide]')"""))
                           last.click()
                           ready.until(lambda b:b.current_url.endswith("#coordinator-guide"))
-                      print(f"{area} {width}px: verified 14 labels, territory, orange highlight, layout and public list focus",flush=True)
+                      driver.get(site+"?area="+area+"&v=r15#leads")
+                      ready.until(lambda b:b.execute_script("return [...document.querySelectorAll('h1')].some(e => e.getClientRects().length && e.textContent.includes('Рыночная обстановка'))"))
+                      assert not driver.execute_script("""return [...document.querySelectorAll('a[href]')].some(e => e.getClientRects().length && /docs\\.google\\.com\\/spreadsheets/.test(e.href))""")
+                      print(f"{area} {width}px: verified all 14 links, sections, key symbol, counts, responsive navigation and market screen",flush=True)
           finally:
               driver.quit()
           PY
@@ -108,6 +116,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: moscow-crm-sidebar-r14
+          name: moscow-crm-sidebar-r15
           path: ${{ runner.temp }}/sidebar-check/*.png
           retention-days: 5
