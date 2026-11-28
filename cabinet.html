@@ -23,7 +23,7 @@
 .sidebar{overflow-y:auto;overscroll-behavior:contain}.source-detail a,.public-evidence a,.research-card a{overflow-wrap:anywhere}
 
 @font-face{font-family:Onest;src:url("onest-crm.woff2") format("woff2");font-display:swap}body,button,input,select,textarea{font-family:Onest,Arial,sans-serif}.sidebar{background:#064c40}.btn.primary{background:#087d65}.brand{font-weight:850;letter-spacing:.04em}.brand span{font-size:10px}.scope-note{border-color:#b6daca;background:#edf8f1;color:#1e594c}
-</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261128-navigation"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}.lead-queue-stats{grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))}.lead-qualification{margin-bottom:16px}.lead-qualification .qualification-controls{margin-bottom:7px}.lead-qualification .meta{margin:0}.qualification-label{display:block;margin:5px 0}.qualification-label .pill{white-space:normal}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
+</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261128-sidebar-r13"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}.lead-queue-stats{grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))}.lead-qualification{margin-bottom:16px}.lead-qualification .qualification-controls{margin-bottom:7px}.lead-qualification .meta{margin:0}.qualification-label{display:block;margin:5px 0}.qualification-label .pill{white-space:normal}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <style>.public-catalog { min-width: 0; padding: 24px clamp(14px, 3vw, 32px) 40px; }
 .public-catalog-header h1 { margin: 0 0 16px; font-size: clamp(1.5rem, 3vw, 2rem); }
@@ -163,10 +163,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 .nav-badge { background: var(--line); color: var(--ink); }
 .nav-item.active .nav-badge { background: var(--nav); }
 .nav-item.active:not(.public) {
-  background: linear-gradient(105deg, color-mix(in srgb, var(--orange) 14%, transparent), var(--brand-carbon));
+  background: linear-gradient(105deg, color-mix(in srgb, var(--orange) 17%, var(--brand-carbon)), var(--brand-carbon));
   box-shadow: inset 3px 0 var(--orange);
 }
-.nav-item.active:not(.public) :is(.nav-icon, .nav-badge) { color: var(--orange); }
+.nav-item.active:not(.public) :is(.nav-icon, .nav-badge) { color: color-mix(in srgb, var(--orange) 58%, var(--brand-cloud-mineral)); }
+.nav-item[data-screen$="-guide"]>span:nth-child(2){max-inline-size:12ch}
+.route-guide {padding:20px;line-height:1.6;overflow-wrap:anywhere}
+.route-guide :is(h3,h4){margin:1.2em 0 .4em}
+.route-guide :is(p,ol,ul){margin:.65em 0}
 .workspace-mark, .avatar, .lead-card .profile-label {
   background: var(--brand-teal-wash);
   color: var(--accent-dark);
@@ -472,7 +476,24 @@ const isStaff=()=>['admin','coordinator','editor'].includes(session?.role);
 const canCoordinate=()=>['admin','coordinator'].includes(session?.role);
 const isDealerRepresentative = () => session?.role === 'dealer_rep';
 const canReadManagerGuide = () => isStaff() || isDealerRepresentative();
-const allRoutes=()=>[...publicRoutes,...routes];
+const guideRoutes = [['manager-guide','?','Инструкция менеджера'],['coordinator-guide','?','Инструкция координатора']];
+const allRoutes = () => [...publicRoutes, ...routes, ...guideRoutes];
+const isGuideRoute = route => guideRoutes.some(([id]) => id === route);
+const canOpenGuide = route => route === 'coordinator-guide' ? canCoordinate() : canReadManagerGuide();
+let publicRequestCounts;
+
+async function loadPublicRequestCounts() {
+  try {
+    const response = await fetch('data.json');
+    if (!response.ok) return;
+    const {views} = await response.json();
+    const region = views?.region?.stats?.total;
+    const city = views?.moscow?.stats?.total;
+    if (![region, city].every(n => Number.isSafeInteger(n) && n >= 0)) return;
+    publicRequestCounts = {all:region + city, rest:region, city};
+    if (!session) drawNav();
+  } catch { /* Keep navigation available if the public snapshot cannot be loaded. */ }
+}
 const fields=['stage','manager','due','next','last','note','amount','reason'];
 const routes=[['leads','▦','Заявки'],['transfers','⇄','Передачи дилерам'],['customers','▣','Клиенты и точки'],['plan','✓','План действий'],['visits','◷','Посещения'],['tests','◇','Тесты плёнок'],['equipment','▱','Оборудование'],['sales','₽','Продажи'],['manager-report','▤','Отчёт менеджера'],['analytics','▥','Аналитика'],['access','⚿','Доступ']];
 const activityNames={task:'Целевое действие',visit:'Посещение',test:'Тест пленки',equipment:'Оборудование'};
@@ -521,7 +542,7 @@ function updateEmailResend() {
   if (remaining > 0) emailResendTimer = setTimeout(updateEmailResend, remaining % 1000 || 1000);
 }
 
-function showSignIn(message=''){$('appShell').hidden=false;$('main').hidden=true;$('authScreen').hidden=false;$('signInPanel').open=true;resetEmailSignIn();drawNav();$('breadcrumb').textContent='Личный кабинет';$('syncStatus').textContent='Вход в CRM';$('refreshWorkspace').hidden=true;$('signOut').hidden=true;setFormBusy(emailStart,!apiAvailable());accessStatus('signInStatus',message||(!apiAvailable()?'Подключение CRM ещё не завершено.':''),!!message);$('authConnectionNote').hidden=apiAvailable();}
+function showSignIn(message=''){$('appShell').hidden=false;$('main').hidden=true;$('authScreen').hidden=false;$('signInPanel').open=true;resetEmailSignIn();drawNav();$('syncStatus').textContent='Вход в CRM';$('refreshWorkspace').hidden=true;$('signOut').hidden=true;setFormBusy(emailStart,!apiAvailable());accessStatus('signInStatus',message||(!apiAvailable()?'Подключение CRM ещё не завершено.':''),!!message);$('authConnectionNote').hidden=apiAvailable();}
 function endSession(message=''){clearStoredSession(sessionStorageSafe(),config.backendUrl);session=null;$('sheetLink').hidden=true;$('sheetLink').removeAttribute('href');viewId+=1;requestId+=1;db=current=null;pendingOperations.clear();resetClientWrites();closeManagerGuide();managerReportState=null;saving=loading=false;closeCard(true);closeModal(true);$('dialogTitle').textContent='';$('dialogStatus').textContent='';$('main').replaceChildren();$('cardTitle').textContent='Карточка';$('cardMeta').textContent='';$('sidebarCount').textContent='Публичное исследование';$('lastSync').textContent='';$('toast').textContent='';$('toast').classList.remove('show');$('identityEmail').textContent='Личный кабинет';$('identityRole').textContent='Вход';$('avatar').textContent='?';notice();render();if(!isPublic(screen))accessStatus('signInStatus',message,!!message);}
 async function openSession(identity,{persist=true,workspace=null,initialReport=null}={}){const display=identity?.email||'';if(!Object.hasOwn(roleLabels,identity?.role)||typeof display!=='string'||!display||typeof identity.token!=='string'||!identity.token)throw new Error('CRM_FORBIDDEN: Доступ не разрешён. Проверьте email и лист Доступы.');session=identity;if(persist)storeSession(sessionStorageSafe(),config.backendUrl,identity);viewId+=1;requestId+=1;db=current=null;resetEmailSignIn();$('authScreen').hidden=true;$('main').hidden=false;$('appShell').hidden=false;$('identityEmail').textContent=display;$('identityRole').textContent=roleLabels[identity.role];$('avatar').textContent=display.slice(0,1).toUpperCase();$('signOut').hidden=false;const sheetUrl=verifiedSheetUrl(identity.sheetUrl);$('sheetLink').hidden=!sheetUrl||identity.role!=='admin';if(sheetUrl)$('sheetLink').href=sheetUrl;$('accessNotice').textContent='Закрытая CRM Московской области. Права и назначение компаний проверяются сервером при каждом запросе. Сессия — до 12 часов в этой вкладке.';if(workspace)applyWorkspace(workspace,initialReport);else await loadWorkspace().catch(()=>{});}
 
@@ -561,8 +582,31 @@ function renderSales(){const items=db.sales.filter(matchItem).sort((a,b)=>b.date
 function salesTable(items){return table(['Дата','Точка','Товар / услуга','Количество × цена','Сумма','Продавец / склад','Статус / источник',''],items.map(s=>[fullDay(s.date),leadButton(s.leadId),`${esc(s.item)}<div class="sub">${s.category==='material'?'Материал':'Услуга'}</div>`,`${count(s.quantity)} ${esc(s.unit||'')} × ${money(s.unitPrice)}`,`<strong class="inline-value">${money(saleAmount(s))}</strong>`,`${esc(s.seller)}<div class="sub">${esc(s.warehouse)}</div>`,`${pill(statusLabels[s.status],s.status==='confirmed'?'green':s.status==='cancelled'?'red':'blue')}<div class="sub">${esc(s.source)}</div>`,btn('Открыть','edit-item',`data-kind="sale" data-id="${esc(s.id)}"`,'small')]));}
 function activityCard(a){return `<article class="action-item"><div><h3>${esc(a.title)}</h3><p>${esc(db.leads.find(l=>l.id===a.leadId)?.name||'Клиент')} · ${esc(a.manager||'Не назначен')}</p><p>${day(a.due)} · ${esc(activityNames[a.kind])}</p></div>${btn('Открыть','edit-item',`data-kind="activity" data-id="${esc(a.id)}"`,'small')}</article>`;}
 function renderAnalytics(){const m=metrics(db),months=monthlyRevenue(db.sales,db.today),max=Math.max(...months.map(x=>x.amount),1),late=m.overdueActions.sort((a,b)=>a.due.localeCompare(b.due));return heading('Аналитика','Реальные записи CRM, текущая воронка и результаты сопровождения')+`<div class="stats">${stat('Накопленная выручка',money(m.revenue),'Подтвержденные материалы и услуги','accent')}${stat('RR · окно 60 дней',m.rr===null?'Нет данных':m.rr+'%',`${m.rrRepeats} из ${m.rrBase} завершённых окон`)}${stat('Покупающие точки',count(m.buyers),'Есть подтвержденная покупка')}${stat('Просроченные действия',count(late.length),'Незавершённые действия со сроком в прошлом',late.length?'attention':'')}</div><div class="analytics-grid"><section class="box"><h2>Распределение по этапам</h2>${db.stages.map((stage,i)=>{const n=db.leads.filter(l=>l.stage===stage).length;return `<div class="bar-row"><span>${esc(stage)}</span><div class="bar-track"><div class="bar-fill" style="width:${m.total?n/m.total*100:0}%;background:${colors[i%colors.length]}"></div></div><strong>${n}</strong></div>`;}).join('')}<p class="chart-legend">Текущее состояние карточек. Для расчёта конверсии нужна история переходов за выбранный период.</p></section><section class="box"><h2>Подтвержденные продажи по месяцам</h2>${m.sales.length?`<div class="monthly-chart" role="img" aria-label="Продажи за последние шесть месяцев: ${esc(months.map(x=>x.month+' '+money(x.amount)).join('; '))}">${months.map(x=>`<div class="month-col"><strong>${x.amount?money(x.amount):'—'}</strong><div class="month-bar" style="height:${Math.max(2,x.amount/max*125)}px"></div></div>`).join('')}</div><div class="month-labels">${months.map(x=>`<span>${esc(new Intl.DateTimeFormat('ru-RU',{month:'short'}).format(new Date(x.month+'-15T12:00:00Z')))}</span>`).join('')}</div>`:'<div class="empty-chart">График появится после первой подтвержденной продажи</div>'}<p class="chart-legend">Накопленная выручка не является прибылью или прогнозным LTV.</p></section></div><section class="box"><div class="box-header"><h2>Требуют внимания</h2>${btn('План действий','navigate','data-screen="plan"','small')}</div><div class="action-stack">${late.slice(0,5).map(activityCard).join('')||empty('Просроченных действий нет','Планируйте следующие шаги, чтобы сопровождение было регулярным.')}</div></section><section class="box table-box">${table(['Клиент','Первая покупка','Покупок','Накопленная выручка','RR · 60 дней'],m.cohorts.sort((a,b)=>b.revenue-a.revenue).map(c=>[leadButton(c.leadId),fullDay(c.first),count(c.count),money(c.revenue),pill(c.complete?(c.repeat?'Повторил':'Не повторил'):'Окно ещё не завершено',c.complete?(c.repeat?'green':'orange'):'blue')]))||empty('История покупок пока пуста','Клиентская аналитика рассчитывается только по подтвержденным продажам.')}</section><p class="chart-legend">RR: доля клиентов с повторной покупкой в течение 60 дней после первой. В знаменатель входят только клиенты с завершённым окном наблюдения. Ручная отчётность может быть неполной.</p>`;}
-function drawNav(){const counts=db?{leads:db.leads.filter(l=>!closedStages.has(l.stage)).length,plan:db.activities.filter(item=>!closedActivities.has(item.status)).length}:{};const item=([route,icon,label],publicRoute=false)=>`<button class="nav-item ${publicRoute?'public ':''}${screen===route?'active':''}" data-action="navigate" data-screen="${route}" ${screen===route?'aria-current="page"':''}><span class="nav-icon" aria-hidden="true">${icon}</span><span>${label}</span>${counts[route]?`<span class="nav-badge">${count(counts[route])}</span>`:''}</button>`;$('nav').innerHTML=`${publicRoutes.map(route=>item(isDealerRepresentative()?[route[0],route[1],'Открытый каталог']:route,true)).join('')}<div class="public-section-label">РАБОТА С КЛИЕНТАМИ</div>${routes.filter(r=>r[0]!=='access'||session?.role==='admin').map(r=>item(r)).join('')}${canReadManagerGuide()?'<button type="button" class="nav-item" data-action="manager-guide" aria-haspopup="dialog"><span class="nav-icon" aria-hidden="true">?</span><span>Инструкция менеджера</span></button>':''}${canCoordinate()?'<button type="button" class="nav-item" data-action="coordinator-guide" aria-haspopup="dialog"><span class="nav-icon" aria-hidden="true">?</span><span>Инструкция координатора</span></button>':''}`;$('breadcrumb').textContent=allRoutes().find(r=>r[0]===screen)?.[2]||'Рынок региона';document.title=$('breadcrumb').textContent+' · FIVEROX';$('sidebarCount').textContent=db?countLabel(db.leads.length,'компания','компании','компаний')+(isStaff()?' в базе':' · доступны вам'):'Открытый каталог';$('refreshWorkspace').hidden=!session||isPublic(screen);}
-function renderRaw(){drawNav();$('publicLeadCatalog').hidden=!isPublic(screen);if(isPublic(screen)){renderPublicLeads();return;}if(!session){if($('authScreen').hidden||!emailAddress)showSignIn();return;}$('authScreen').hidden=true;$('main').hidden=false;if(!db){$('main').innerHTML='<div class="loading-state">Загружаю рабочие данные…</div>';return;}const renders={leads:()=>renderLeads(),customers:()=>renderLeads(true),plan:()=>renderActivities(),visits:()=>renderActivities('visit'),tests:()=>renderActivities('test'),equipment:()=>renderActivities('equipment'),transfers:renderTransfers,sales:renderSales,analytics:renderAnalytics,access:renderAccess,'manager-report':renderManagerReport};$('main').innerHTML=(renders[screen]||renders.leads)();$('main').insertAdjacentHTML('afterbegin','<p class="scope-note">CRM Московская область · рабочие данные сохраняются в закрытую Google Таблицу. Доступом управляет владелец.</p>');setSaving(saving);}
+function drawNav() {
+  const counts = db ? {
+    leads:db.leads.filter(lead => !closedStages.has(lead.stage)).length,
+    plan:db.activities.filter(item => !closedActivities.has(item.status)).length,
+  } : {};
+  if (!session && publicRequestCounts) counts.leads = publicRequestCounts[geoScope];
+  function item([route,icon,label], publicRoute = false) {
+    const active = screen === route;
+    const caption = route === 'leads' && !session ? 'Точек в исследовании' : label;
+    const showCount = Number.isInteger(counts[route]) && (route === 'leads' || counts[route] > 0);
+    const badge = showCount ? `<span class="nav-badge" title="${esc(caption)}" aria-label="${esc(caption)}: ${count(counts[route])}">${count(counts[route])}</span>` : '';
+    return `<button type="button" class="nav-item ${publicRoute?'public ':''}${active?'active':''}" data-action="navigate" data-screen="${route}" ${active?'aria-current="page"':''}>
+      <span class="nav-icon" aria-hidden="true">${icon}</span><span>${esc(label)}</span>${badge}</button>`;
+  }
+  const work = routes.filter(([route]) => route !== 'access' || !session || session.role === 'admin');
+  const guides = guideRoutes.filter(([route]) => !session || canOpenGuide(route));
+  $('nav').innerHTML = publicRoutes.map(route => item(isDealerRepresentative() ? [route[0],route[1],'Открытый каталог'] : route,true)).join('') +
+    '<div class="public-section-label">РАБОТА С КЛИЕНТАМИ</div>' +
+    [...work, ...guides].map(route => item(route)).join('');
+  $('breadcrumb').textContent = allRoutes().find(([route]) => route === screen)?.[2] || 'Личный кабинет';
+  document.title = $('breadcrumb').textContent + ' · FIVEROX';
+  $('sidebarCount').textContent = db ? countLabel(db.leads.length,'компания','компании','компаний') + (isStaff() ? ' в базе' : ' · доступны вам') : 'Открытый каталог';
+  $('refreshWorkspace').hidden = !session || isPublic(screen);
+}
+function renderRaw(){drawNav();$('publicLeadCatalog').hidden=!isPublic(screen);if(isPublic(screen)){renderPublicLeads();return;}if(!session){if($('authScreen').hidden||!emailAddress)showSignIn();return;}$('authScreen').hidden=true;$('main').hidden=false;if(isGuideRoute(screen)){renderGuideScreen();return;}if(!db){$('main').innerHTML='<div class="loading-state">Загружаю рабочие данные…</div>';return;}const renders={leads:()=>renderLeads(),customers:()=>renderLeads(true),plan:()=>renderActivities(),visits:()=>renderActivities('visit'),tests:()=>renderActivities('test'),equipment:()=>renderActivities('equipment'),transfers:renderTransfers,sales:renderSales,analytics:renderAnalytics,access:renderAccess,'manager-report':renderManagerReport};$('main').innerHTML=(renders[screen]||renders.leads)();$('main').insertAdjacentHTML('afterbegin','<p class="scope-note">CRM Московская область · рабочие данные сохраняются в закрытую Google Таблицу. Доступом управляет владелец.</p>');setSaving(saving);}
 
 function closeMenu(){$('sidebar').classList.remove('open');$('navBackdrop').hidden=true;$('menuToggle').setAttribute('aria-expanded','false');}
 $('menuToggle').addEventListener('click',()=>{const on=!$('sidebar').classList.contains('open');$('sidebar').classList.toggle('open',on);$('navBackdrop').hidden=!on;$('menuToggle').setAttribute('aria-expanded',String(on));});$('navBackdrop').addEventListener('click',closeMenu);
@@ -659,7 +703,7 @@ function render(){
   const full=db;
   if(db)db=scopedDatabase(db);
   try{renderRaw();}finally{db=full;}
-  if(session&&full&&screen!=='access'&&!isPublic(screen))$('main').insertAdjacentHTML('afterbegin',`<div class="geo-selector" role="group" aria-label="Территория CRM">${[['all','Москва и Московская область'],['city','Москва'],['rest','Московская область без Москвы']].map(([id,label])=>`<button type="button" class="btn ${geoScope===id?'primary':''}" data-action="geo" data-scope="${id}" aria-pressed="${geoScope===id}">${label}</button>`).join('')}<span class="meta">${geoScope==='rest'?'Карточки без установленного города исключены.':'Одна база · Москва выделена без двойного счёта'}</span></div>`);
+  if(session&&full&&screen!=='access'&&!isPublic(screen)&&!isGuideRoute(screen))$('main').insertAdjacentHTML('afterbegin',`<div class="geo-selector" role="group" aria-label="Территория CRM">${[['all','Москва и Московская область'],['city','Москва'],['rest','Московская область без Москвы']].map(([id,label])=>`<button type="button" class="btn ${geoScope===id?'primary':''}" data-action="geo" data-scope="${id}" aria-pressed="${geoScope===id}">${label}</button>`).join('')}<span class="meta">${geoScope==='rest'?'Карточки без установленного города исключены.':'Одна база · Москва выделена без двойного счёта'}</span></div>`);
 }
 function renderAccess(){
   if(session?.role!=='admin')return empty('Доступ ограничен','Сотрудников добавляет владелец.');
@@ -1354,6 +1398,19 @@ function initializePointerKanban(){
 const managerGuide = $('managerGuide');
 const managerGuideBody = $('managerGuideBody');
 
+function renderGuideScreen() {
+  const [route,,label] = guideRoutes.find(([id]) => id === screen);
+  if (!canOpenGuide(route)) {
+    $('main').innerHTML = heading(label,'') + empty('Доступ ограничен','Эта инструкция доступна сотрудникам с соответствующей ролью.');
+    return;
+  }
+  if ($('routeGuideBody')?.dataset.route === route) return;
+  $('main').innerHTML = heading(label,'') +
+    `<section class="box route-guide" id="routeGuideBody" data-route="${route}" aria-label="${esc(label)}"></section>`;
+  const method = route === 'coordinator-guide' ? 'crmCoordinatorGuide' : 'crmManagerGuide';
+  void loadManagerGuide(method, $('routeGuideBody'));
+}
+
 function openManagerGuide(kind = 'manager') {
   const coordinator = kind === 'coordinator';
   if (managerGuide.open || !(coordinator ? canCoordinate() : canReadManagerGuide())) return;
@@ -1371,15 +1428,15 @@ managerGuide.addEventListener('close', () => {
   if (!managerGuide.open) managerGuideBody.replaceChildren();
 });
 
-async function loadManagerGuide(method) {
+async function loadManagerGuide(method, body = managerGuideBody) {
   const status = document.createElement('p');
   status.setAttribute('role', 'status');
   status.textContent = 'Загружаю инструкцию…';
-  managerGuideBody.replaceChildren(status);
-  const isCurrent = () => managerGuide.open && managerGuideBody.contains(status);
+  body.replaceChildren(status);
+  const isCurrent = () => body.isConnected && body.contains(status) && (body !== managerGuideBody || managerGuide.open);
   try {
     const rows = await crmCall(method);
-    if (isCurrent()) renderManagerGuide(rows);
+    if (isCurrent()) renderManagerGuide(rows, body);
   } catch (error) {
     if (error === abandoned || !isCurrent()) return;
     status.textContent = 'Не удалось загрузить инструкцию.';
@@ -1395,12 +1452,12 @@ async function loadManagerGuide(method) {
     retry.type = 'button';
     retry.className = 'btn';
     retry.textContent = 'Повторить загрузку';
-    retry.addEventListener('click', () => loadManagerGuide(method), { once: true });
+    retry.addEventListener('click', () => loadManagerGuide(method, body), { once: true });
     status.after(retry);
   }
 }
 
-function renderManagerGuide(rows) {
+function renderManagerGuide(rows, body = managerGuideBody) {
   const content = document.createDocumentFragment();
   let list = null;
   for (const [kind, text, target] of rows) {
@@ -1437,8 +1494,8 @@ function renderManagerGuide(rows) {
     }
     content.append(element);
   }
-  managerGuideBody.replaceChildren(content);
-  managerGuideBody.scrollTop = 0;
+  body.replaceChildren(content);
+  body.scrollTop = 0;
 }
 
 function openBulkAssignment() {
@@ -2028,6 +2085,7 @@ emailVerify.addEventListener('submit', verifyEmailAndOpen);
 
 initializePointerKanban();
 initialize();
+void loadPublicRequestCounts();
 
 
 
