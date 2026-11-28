@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0B1114">
-  <meta name="build" content="moscow-mo-20261119-r1">
-  <meta name="description" content="FIVEROX · экономика региона, рыночная обстановка, калькулятор продаж и СРМ Московской области и Москвы.">
+  <meta name="build" content="moscow-mo-20261128-r6">
+  <meta name="description" content="FIVEROX · экономика региона, рыночная обстановка, калькулятор продаж и СРМ Москвы и Московской области.">
   <meta name="robots" content="noindex,nofollow">
   <title>FIVEROX · Москва и Московская область</title>
   <style>:root {
@@ -112,6 +112,73 @@ th{font-size:.82rem;color:var(--titanium);font-weight:660}
 td.numeric,th.numeric{text-align:right;font-variant-numeric:tabular-nums}
 td strong{color:var(--cloud)}
 .range-table{min-width:490px}
+.economy-key h2{font-size:clamp(1.15rem,2vw,1.55rem);margin-bottom:12px}
+.economy-metrics{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
+.economy-tile{background:linear-gradient(155deg,var(--brand-teal-wash),var(--surface) 60%);gap:9px}
+.economy-tile dd small{display:block;margin-top:3px;font-weight:550}
+.economy-tile .economy-tile-meta{display:grid;gap:5px;margin-top:auto;font:inherit;letter-spacing:normal}
+.economy-tile-baseline{display:flex;align-items:center;flex-wrap:wrap;gap:5px 10px;color:var(--titanium);font-size:.82rem}
+.economy-delta{display:inline-block;padding:3px 8px;border-radius:999px;background:var(--brand-teal-wash);color:var(--teal-light);font-size:.82rem;font-weight:720;white-space:nowrap}
+.economy-visuals{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+.economy-visuals h2{font-size:clamp(1.14rem,1.8vw,1.45rem)}
+.economy-compare .columns{height:210px}
+.economy-chart-footer,.economy-chart-sources{display:flex;align-items:center;flex-wrap:wrap;gap:6px 12px;margin-top:12px}
+.economy-chart-footer .source-ref,.economy-chart-sources .source-ref{margin:0}
+.economy-rings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.economy-ring{min-width:0;padding:12px 10px;border-radius:12px;border:1px solid var(--edge)}
+.economy-ring h3{text-align:center;font-size:.92rem;margin-bottom:9px}
+.economy-ring .donut-grid{grid-template-columns:1fr;gap:10px}
+.economy-ring .donut{max-width:108px}
+.economy-ring .donut-center{font-size:.86rem}
+.economy-ring .legend{gap:5px}
+.economy-ring .legend li{gap:5px}
+.economy-ring .legend span,.economy-ring .legend strong{font-size:.76rem}
+.economy-ring .legend strong small{font-size:.73rem}
+.economy-growth .bars{gap:13px}
+.economy-growth .bar-row strong{white-space:nowrap;color:var(--cloud)}
+.economy-track{position:relative;height:8px;margin-top:6px;background:var(--edge);border-radius:999px;overflow:hidden}
+.economy-track::after{content:"";position:absolute;inset:0 auto 0 50%;width:1px;background:var(--titanium)}
+.economy-track span{position:absolute;inset:0 auto 0 var(--from);width:var(--width);background:var(--teal)}
+.economy-track span.negative{background:var(--orange)}
+.economy-intro{margin:8px 0 0}
+.economy-detail .economy-section{margin-top:16px}
+.economy-section .block-head{margin-bottom:8px}
+.economy-section .block-head h3{font-size:clamp(1.25rem,2.5vw,1.65rem)}
+.economy-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.economy-table th,.economy-table td{padding:12px 10px;vertical-align:top;border-bottom:1px solid var(--brand-graphite)}
+.economy-table tbody tr:last-child>*{border-bottom:0}
+.economy-table th[scope=row]{text-align:left;font-weight:400;width:55%}
+.economy-table td{white-space:nowrap}
+.economy-period{display:block;margin-top:3px;color:var(--brand-titanium);font-size:.83em}
+.economy-sources{display:flex;flex-wrap:wrap;gap:4px 12px}
+.economy-change{color:var(--brand-ice-teal);font-weight:700}
+.economy-bar{display:block;margin:5px 0 0 auto;width:min(100%,65px);height:3px;background:var(--brand-graphite);border-radius:4px;overflow:hidden}
+.economy-bar::after{content:"";display:block;height:100%;width:var(--fill);background:var(--brand-titanium);border-radius:inherit}
+.economy-table td[data-year="2026"] .economy-bar::after{background:var(--brand-apex-teal)}
+@media(max-width:1040px){
+  .economy-visuals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .economy-growth{grid-column:1/-1}
+}
+@media(max-width:700px){
+  .economy-visuals{grid-template-columns:1fr;gap:12px}
+  .economy-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .economy-compare .columns{height:170px}
+}
+@media(max-width:370px){
+  .economy-ring .legend li{grid-template-columns:8px minmax(0,1fr)}
+  .economy-ring .legend strong{grid-column:2;text-align:left;white-space:normal}
+  .economy-ring .legend strong small{display:inline;margin-left:4px}
+}
+@media(max-width:620px){
+  .economy-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .economy-table tbody tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--brand-graphite);padding:11px 0;row-gap:7px}
+  .economy-table tbody tr:last-child{border-bottom:0}
+  .economy-table th[scope=row]{grid-column:1/-1;width:auto}
+  .economy-table th,.economy-table td{padding:0;border:0}
+  .economy-table td{text-align:left;font-size:clamp(.78rem,3.6vw,.95rem)}
+  .economy-table td::before{content:attr(data-year);font-size:.75rem;font-weight:400;color:var(--brand-titanium);display:block}
+  .economy-bar{margin-left:0}
+}
 .source-details{margin-top:12px}
 .source-details summary{color:var(--teal-light);font-size:.9rem;font-weight:620;cursor:pointer}
 .source-list{display:grid;gap:10px;margin-top:13px;padding-left:22px}
@@ -129,9 +196,22 @@ td strong{color:var(--cloud)}
 .callout p{margin-top:6px}
 .note{border-left:2px solid var(--orange);padding-left:11px;color:var(--titanium)}
 .crm-tab{padding-bottom:40px}
-.crm-heading{padding-block:22px}
-.crm-heading h1{font-size:clamp(1.5rem,3vw,2.2rem)}
-.crm-frame{display:block;width:100%;height:78vh;min-height:470px;border:1px solid var(--edge);border-radius:var(--radius);background:var(--surface)}
+.catalog-layout{display:grid;grid-template-columns:minmax(208px,.7fr) minmax(0,2.3fr);gap:16px;margin:20px 0;align-items:start}
+.catalog-nav{display:grid;gap:12px}
+.catalog-nav .button{justify-self:start}
+.catalog-filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+.catalog-filters label{display:grid;gap:7px;min-width:0;font-size:.9rem}
+.catalog-filters input,.catalog-filters select{min-width:0;width:100%;border:1px solid var(--edge);border-radius:7px;background:var(--base);color:var(--cloud);padding:10px;font:inherit}
+.catalog-filters select:focus-visible{outline:2px solid var(--teal-light);outline-offset:4px}
+.catalog-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.catalog-card{overflow-wrap:anywhere}
+.catalog-card h3,.catalog-card p{margin:7px 0}
+.catalog-card small{color:var(--titanium)}
+.catalog-card summary{cursor:pointer}
+.catalog-card ul{padding-inline-start:20px}
+.catalog-links,.catalog-pager{display:flex;gap:12px;flex-wrap:wrap}
+.catalog-pager{margin-top:12px}
+.catalog-pager button:disabled{opacity:.45;cursor:default}
 .honeycomb{position:relative;isolation:isolate;overflow:hidden}
 .honeycomb::before{content:"";position:absolute;inset:0 0 0 48%;z-index:-1;opacity:.08;mask-image:linear-gradient(90deg,transparent,#000);background-image:linear-gradient(30deg,var(--teal-light) 1px,transparent 1px),linear-gradient(150deg,var(--teal-light) 1px,transparent 1px),linear-gradient(30deg,var(--teal-light) 1px,transparent 1px),linear-gradient(150deg,var(--teal-light) 1px,transparent 1px),linear-gradient(60deg,transparent 71%,var(--teal-light) 72% 74%,transparent 75%),linear-gradient(60deg,transparent 71%,var(--teal-light) 72% 74%,transparent 75%);background-size:35px 60px;background-position:0 0,0 0,17.5px 30px,17.5px 30px,0 0,17.5px 30px}
 .basket-card,.calc-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
@@ -175,9 +255,13 @@ input[type=range]{accent-color:var(--teal);width:100%}
 .embedded main{padding-block:16px}
 @media(max-width:780px){
   .shell{width:calc(100% - 32px)}
+  .catalog-layout,.catalog-list{grid-template-columns:1fr}
   .calc-layout,.basket-card{grid-template-columns:1fr}
   .section-heading,.block-head{align-items:flex-start;flex-direction:column}
   .basket-product{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .catalog-filters{grid-template-columns:1fr}
 }
 @media(max-width:490px){
   .shell{width:calc(100% - 24px)}
@@ -221,16 +305,13 @@ input[type=range]{accent-color:var(--teal);width:100%}
     </nav>
   </header>
   <main class="shell" id="main" tabindex="-1"></main>
-  <section class="shell crm-tab" id="crmTab" aria-labelledby="crmTitle" tabindex="-1" hidden>
-    <div class="crm-heading"><h1 id="crmTitle">ЛИДы и СРМ</h1></div>
-    <p id="crmLoading" role="status" hidden>Открываю кабинет…</p>
-  </section>
+  <section class="shell crm-tab" id="crmTab" aria-label="Список ЛИДов" tabindex="-1" hidden></section>
   <footer class="shell footer">
     <strong>FIVEROX</strong>
     <span id="footerDate"></span>
   </footer>
   <p id="toast" role="status" aria-live="polite"></p>
-  <script id="public-data" type="application/json">{"revision":"moscow-mo-20261119-r1","dataDate":"2026-11-19","researchDate":"2026-11-19","views":{"region":{"label":"Московская область","territory":"Московская область","stats":{"total":45,"confirmed":19,"candidates":26,"wrapOnly":8,"tintOnly":9,"both":2,"phones":10,"withAmounts":9,"pricePositions":12,"sources":[["Яндекс",33],["2ГИС",11],["Сайт компании",1]],"cities":[["Коломна",22],["Люберцы",11],["Мытищи",4],["Балашиха",2],["Одинцово",2],["Томилино",1],["пгт Заречье",1],["Котельники",1],["Новоивановское",1]],"prices":[{"label":"Оклейка · весь кузов","low":250000,"high":250000,"count":1,"fromCount":1},{"label":"Оклейка · зоны риска / передняя часть","low":50000,"high":75000,"count":2,"fromCount":1},{"label":"Оклейка · отдельный элемент","low":3000,"high":15000,"count":5,"fromCount":2},{"label":"Тонировка · передние стекла","low":3000,"high":3000,"count":1,"fromCount":0}]},"market":[{"title":"Население и доходы","description":"Последние сопоставимые показатели, подтвержденные в источниках этого выпуска.","metrics":[{"label":"Постоянное население","value":8775700,"unit":"чел.","period":"На 01.01.2025, округлено Мосстатом до 0,1 тыс.","source":"population"},{"label":"Среднедушевой денежный доход","value":91248,"unit":"₽/мес.","period":"2025, предварительная оценка","source":"incomeO"}],"charts":[{"title":"Население двух субъектов","type":"bars","items":[["Москва",13274300],["Московская область",8775700]],"source":"population"}]},{"title":"Легковые автомобили","description":"Парк и продажи по данным «Автостат Инфо». Сопоставимое число перепродаж за 2025 год уточняется.","metrics":[{"label":"Легковые автомобили в парке","value":2827600,"unit":"авто","period":"Конец 2025 года, по данным отраслевого источника","source":"autoO"},{"label":"Новые легковые автомобили","value":106400,"unit":"авто","period":"Январь–декабрь 2025","source":"autoO"}],"charts":[{"title":"Структура парка по происхождению марки","type":"donut","items":[["Иномарки",2298000],["Отечественные марки",529600]],"source":"autoO"},{"title":"Возраст легковых автомобилей","type":"donut","items":[["До 3 лет включительно",263200],["От 4 до 10 лет",747300],["Старше 10 лет",1817100]],"source":"autoO"}]}]},"moscow":{"label":"Москва","territory":"Москва","stats":{"total":211,"confirmed":127,"candidates":84,"wrapOnly":8,"tintOnly":110,"both":9,"phones":29,"withAmounts":4,"pricePositions":7,"sources":[["2ГИС",183],["Яндекс",27],["2ГИС + Яндекс",1]],"cities":[["Москва",211]],"prices":[{"label":"Оклейка · весь кузов","low":260000,"high":260000,"count":1,"fromCount":0},{"label":"Оклейка · зоны риска / передняя часть","low":78000,"high":78000,"count":1,"fromCount":0},{"label":"Оклейка · отдельный элемент","low":20000,"high":20000,"count":1,"fromCount":0}]},"market":[{"title":"Население и доходы","description":"Последние сопоставимые показатели, подтвержденные в источниках этого выпуска.","metrics":[{"label":"Постоянное население","value":13274300,"unit":"чел.","period":"На 01.01.2025, округлено Мосстатом до 0,1 тыс.","source":"population"},{"label":"Среднедушевой денежный доход","value":165866,"unit":"₽/мес.","period":"2025, предварительная оценка","source":"incomeM"}],"charts":[{"title":"Население двух субъектов","type":"bars","items":[["Москва",13274300],["Московская область",8775700]],"source":"population"}]},{"title":"Легковые автомобили","description":"Парк и продажи по данным «Автостат Инфо».","metrics":[{"label":"Легковые автомобили в парке","value":4004400,"unit":"авто","period":"Конец 2025 года, по данным отраслевого источника","source":"autoM"},{"label":"Новые легковые автомобили","value":196600,"unit":"авто","period":"Январь–декабрь 2025","source":"autoM"},{"label":"Перепродажи легковых авто","value":407960,"unit":"авто","period":"Январь–декабрь 2025","source":"autoUsedM"},{"label":"Средний возраст парка","value":12.1,"unit":"года","period":"Конец 2025 года","source":"autoM"}],"charts":[{"title":"Структура парка по происхождению марки","type":"donut","items":[["Иномарки",3429600],["Отечественные марки",574800]],"source":"autoM"},{"title":"Возраст легковых автомобилей","type":"donut","items":[["До 3 лет включительно",569000],["От 4 до 10 лет",1253500],["Старше 10 лет",2181900]],"source":"autoM"}]}]}},"sources":{"population":{"name":"Мосстат · численность населения","url":"https://77.rosstat.gov.ru/storage/mediabank/Оценка%20численности%20постоянного%20населения%20(на%2001.01.2025%20г.).htm","note":"Постоянное население на 1 января 2025 года. Два самостоятельных субъекта РФ."},"incomeM":{"name":"Мосстат · Москва в цифрах","url":"https://77.rosstat.gov.ru/storage/mediabank/Москва%20в%20цифрах%202025.pdf","note":"Среднедушевые денежные доходы в месяц за 2025 год, предварительные данные Мосстата."},"incomeO":{"name":"Росстат · доходы по субъектам","url":"https://68.rosstat.gov.ru/storage/mediabank/Tmb_obl_2026.pdf","note":"Среднедушевые денежные доходы в месяц за 2025 год, предварительные данные Росстата."},"autoM":{"name":"Автостат Инфо · парк Москвы","url":"https://avtostat-info.ru/News/12389","note":"Зарегистрированные легковые автомобили на конец 2025 года. Продажи новых машин за январь–декабрь 2025."},"autoO":{"name":"Автостат Инфо · парк Московской области","url":"https://avtostat-info.ru/News/12408","note":"Зарегистрированные легковые автомобили на конец 2025 года. Продажи новых машин за январь–декабрь 2025."},"autoUsedM":{"name":"Автостат Инфо · перепродажи Москвы","url":"https://avtostat-info.ru/news/12338","note":"Перепродажи легковых автомобилей за январь–декабрь 2025 года."},"tax":{"name":"ФНС · реестр МСП","url":"https://www.ofd.nalog.ru/","note":"Динамическая статистика юридических лиц и ИП в реестре МСП."}}}</script>
+  <script id="public-data" type="application/json">{"revision":"moscow-mo-20261128-r6","dataDate":"2026-11-28","researchDate":"2026-11-28","economyDate":"2026-11-28","sources":{"mo-pop":{"name":"Правительство Московской области · Росстат","url":"https://mosoblpravo.ru/postanovlenie/2026/03/10/n-212-pp/","note":"Постоянное население в административных границах на 1 января 2025 года."},"mo-pop-history":{"name":"Правительство Московской области · динамика населения","url":"https://base.garant.ru/412891765/","note":"На 01.01.2024 — 8 651 260, на 01.01.2025 — 8 775 735 человек."},"msk-pop":{"name":"Аналитический центр Москвы · Росстат","url":"https://ac.mos.ru/dashboards/key-indicators/demography/","note":"Население города федерального значения, в административных границах."},"income25":{"name":"Росстат · II квартал 2025","url":"https://www.rosstat.gov.ru/storage/mediabank/osn-10-2025.pdf","note":"Номинальные доходы и потребительские расходы на одного жителя в месяц, приложение по субъектам РФ."},"income26":{"name":"Мосстат · II квартал 2026 · область","url":"https://base.garant.ru/415191607/","note":"Первая оценка среднедушевых доходов за II квартал."},"mo-cost":{"name":"Мосстат · доходы и расходы","url":"https://77.rosstat.gov.ru/folder/64509","note":"Раздел оперативных публикаций по Московской области."},"mos-income26":{"name":"Мосстат · социально-экономическое положение Москвы","url":"https://base.garant.ru/414881820/","note":"Потребительские расходы за II квартал 2026 года в расчёте на одного жителя в месяц."},"salary":{"name":"Т–Ж · сопоставимый ряд Росстата","url":"https://t-j.ru/news/salary-rosstat-2026-10/","note":"Средние начисленные номинальные зарплаты за август обоих лет. Места рассчитаны по одинаковому набору из 83 территорий в этой публикации."},"sme":{"name":"Единый реестр МСП ФНС · данные ИПБА ВШЭ","url":"https://hseipaa.ru/index.php/analytics/small-business-2025-2026","note":"Срезы на 10 января 2025 и 2026 годов, сумма юрлиц и ИП из реестра."},"park-mo":{"name":"Автостат Инфо · парк Московской области","url":"https://avtostat-info.ru/News/12408","note":"2 827,6 тыс. легковых на конец 2025 года, рост за год 3,1%."},"park-moscow":{"name":"Автостат Инфо · парк Москвы","url":"https://avtostat-info.ru/News/12389","note":"4 004,4 тыс. легковых на конец 2025 года, рост за год 1,5%."},"new-oct":{"name":"Автостат Инфо · новые легковые по регионам","url":"https://avtostat-info.ru/news/12792","note":"Регистрации в октябре 2026 года, опубликованы объём и округлённый годовой темп."},"used-nine":{"name":"Автостат · данные по вторичному рынку","url":"https://mo-24.ru/moskovskaya-oblast-voshla-v-top-3-regionov-po-obyomu-prodazh-avtomobilej-s-probegom/","note":"Январь–сентябрь. Объём 2026 и округлённый темп по данным «Автостата»."},"ru-new":{"name":"Автостат Инфо · новые легковые, Россия","url":"https://avtostat-info.ru/articles/444","note":"Регистрации за январь–сентябрь, все регионы России."},"ru-used":{"name":"Автостат Инфо · легковые с пробегом, Россия","url":"https://avtostat-info.ru/articles/443","note":"Перерегистрации за январь–сентябрь, все регионы России."}},"economyContext":{"new":{"id":"nationalNew","label":"Регистрации новых легковых","values":[882399,950286],"unit":"авто","period":"Январь–сентябрь","sources":["ru-new"],"note":"","approx":[false,false]},"used":{"id":"nationalUsed","label":"Перерегистрации легковых с пробегом","values":[4634426,4708676],"unit":"авто","period":"Январь–сентябрь","sources":["ru-used"],"note":"","approx":[false,false]},"scope":"Россия"},"researchUrl":"https://docs.google.com/spreadsheets/d/1F4tgKgCwDj_v1jx9UhFP9ai9ccQMNtD8A_Ow4zevmb8/edit","views":{"region":{"label":"Московская область","territory":"Московская область","stats":{"total":1116,"confirmed":38,"candidates":1078,"call":15,"wrapOnly":19,"tintOnly":9,"both":10,"phones":48,"withAmounts":21,"cities":[["Химки",66],["Балашиха",58],["Мытищи",58],["Люберцы",46],["Одинцово",42],["Подольск",42],["Коломна",39],["Красногорск",31],["Домодедово",31],["Пушкино",24],["Населенный пункт уточняется",24],["Новоивановское",23],["Солнечногорск",23],["Серпухов",20],["Долгопрудный",18],["Видное",17],["Сергиев Посад",16],["Раменское",16],["Истра",15],["Клин",14],["Щелково",14],["Истра муниципальный округ",13],["Ногинск",13],["Королев",13],["Котельники",12],["Чехов",12],["Жуковский",12],["Реутов",12],["Ивантеевка",11],["Королёв",11],["Ступино",11],["Вешки",10],["Электросталь",10],["Лобня",10],["Дмитров",10],["Щёлково",9],["Наро-Фоминск",9],["Орехово-Зуево",8],["Воскресенск",8],["Дубна",8],["Раменский муниципальный округ",7],["Егорьевск",7],["с. Юдино",7],["Звенигород",6],["Развилка",6],["с. Немчиновка",5],["Нахабино",5],["Андреевка",5],["Кашира",5],["Лосино-Петровский",5],["пос. Битца",5],["Луховицы",5],["Томилино",4],["Нагорное",4],["Дзержинский",4],["Старая Купавна",4],["Апрелевка",4],["Краснознаменск",4],["Аристово",4],["Большие Вязёмы",3],["с. Успенское",3],["Малаховка",3],["с. Ям",3],["Волоколамск",3],["Талдом",3],["пос. Горки-10",3],["пос. Лесные Поляны",3],["Барвиха",2],["Гольево",2],["ВНИИССОК",2],["Жилино-1",2],["с. Тарасовка",2],["Марусино",2],["Брёхово",2],["Суханово",2],["Бронницы",2],["Фрязино",2],["Юрлово",2],["Шатура",2],["Кубинка",2],["Жуковка",2],["Селятино",2],["Мисайлово",2],["совхоза им. Ленина",2],["Ржавки",2],["Голицыно",2],["Загорянский",2],["Акулово",2],["с. Петрово-Дальнее",2],["Битца",2],["с. Ильинское",2],["Немчиновка",2],["Красногорск городской округ",2],["Лыткарино",2],["Павловский Посад",2],["пгт Заречье",2],["Горки-2",2],["Богородский",2],["пгт Заречье",1],["Лесной",1],["Коргашино",1],["Трехгорка",1],["Белая",1],["Мечниково",1],["Голиково",1],["Елино",1],["Павловское",1],["Новосельцево",1],["дома отдыха \"Озера\"",1],["Измайлово",1],["Обухово",1],["дома отдыха \"Успенское\"",1],["с. Жаворонки",1],["Егорово",1],["с. Дмитровское",1],["Ащерино",1],["Чёрное",1],["Оболдино",1],["Кощейково",1],["Чайковского",1],["Вырубово",1],["с. Введенское",1],["Лесные Поляны",1],["Отрадное",1],["Грибки",1],["Житнево",1],["Чехов муниципальный округ",1],["с. Сватково",1],["Жучки",1],["Архангельское",1],["с. Константиновское",1],["Дедовск",1],["Андреевское",1],["Жостово",1],["Шевляково",1],["Заречье",1],["с. Лайково",1],["Шолохово",1],["Большие Жеребцы",1],["Горки",1],["с. Новый Милет",1],["Сетунь Малая",1],["Володарского",1],["Ильинское-Усово",1],["Пирогово",1],["Дмитровский муниципальный округ",1],["с. Растуново",1],["Яхрома",1],["Путилково",1],["Осеево",1],["Ближние Прудищи",1],["Сосновый Бор",1],["Орловка",1],["Юрасово",1],["Жилино",1],["Юдино",1],["Домодедово городской округ",1],["д. Верея",1],["д. Демихово",1],["Железнодорожный",1],["д. Дубровки",1],["д. Каменка",1],["д. Какузево",1],["пос. совхоза \"Сафоновский\"",1],["Быково",1],["пос. Часцы",1],["д. Шмеленки",1],["д. Белеутово",1],["Красноармейск",1],["д. Дыдылдино",1],["д. Кузнецы",1],["д. Становое",1],["Лесной Городок",1],["д. Кощейково",1],["д. Сивково",1],["д. Горки",1],["пос. совхоза им. Ленина",1],["д. Жуковка",1],["пгт Ильинский",1],["д. Пуговичино",1],["пос. совхоза \"Раменское\"",1],["пгт Запрудня",1],["Руза",1],["д. Нестерово",1],["д. Волдынское",1],["пгт Сычёво",1],["Зарайск",1],["пос. Дорохово",1],["Булатниково",1],["Черноголовка",1],["Михалково",1],["Сырьево",1],["Часовня",1]],"sources":[["2ГИС",1030],["Яндекс",81],["2ГИС + Яндекс",3],["Другой источник",2]],"pricePositions":45,"prices":[{"label":"Оклейка · весь кузов","count":8,"low":140000,"high":275000,"fromCount":7},{"label":"Оклейка · зоны риска / передняя часть","count":11,"low":50000,"high":90000,"fromCount":7},{"label":"Оклейка · отдельный элемент","count":5,"low":3000,"high":15000,"fromCount":2},{"label":"Тонировка · задняя полусфера","count":5,"low":5000,"high":8000,"fromCount":5},{"label":"Тонировка · лобовое стекло","count":1,"low":4500,"high":4500,"fromCount":1},{"label":"Тонировка · передние стекла","count":2,"low":3000,"high":4000,"fromCount":1}]},"market":[{"title":"Население","description":"Постоянные жители Московской области.","metrics":[{"id":"population","label":"Постоянное население","values":[8775735,8900000],"unit":"чел.","period":"На 1 января · 2025 Росстат, 2026 расчёт","sources":["mo-pop","mo-pop-history"],"note":"Открытая оценка Росстата на 01.01.2026 не подтверждена. Рабочая оценка — 8 775 735 + (8 775 735 − 8 651 260), округление до 10 тыс.","approx":[false,true]}]},{"title":"Доходы, расходы и рейтинг","description":"Доходы и расходы на жителя, начисленная зарплата и место по её размеру.","metrics":[{"id":"income","label":"Среднедушевой денежный доход","values":[91334,102811],"unit":"₽/мес.","period":"II квартал · 2026 первая оценка","sources":["income25","income26"],"note":"Сравнение опубликованных значений. Официальный темп может отличаться после пересмотра базы.","approx":[false,false]},{"id":"spending","label":"Потребительские расходы на жителя","values":[63733,null],"unit":"₽/мес.","period":"II квартал","sources":["income25","mo-cost"],"note":"Сопоставимая величина за II квартал 2026 года в доступном представлении не подтверждена.","approx":[false,false]},{"id":"salary","label":"Средняя начисленная зарплата","values":[108639,126066],"unit":"₽/мес.","period":"Август","sources":["salary"],"note":"","approx":[false,false]},{"id":"rank","label":"Место по средней начисленной зарплате","values":[12,10],"unit":"из 83 территорий","period":"Август","sources":["salary"],"note":"Место вычислено по значениям каждого года независимо.","approx":[false,false],"change":"rank"}]},{"title":"Предпринимательство","description":"Единый реестр МСП.","metrics":[{"id":"sme","label":"Субъекты МСП","values":[457770,478705],"unit":"юрлиц и ИП","period":"На 10 января","sources":["sme"],"note":"","approx":[false,false]}]},{"title":"Легковые автомобили","description":"Каждая строка использует свой единый период и определение.","metrics":[{"id":"passengerStock","label":"Легковые в зарегистрированном парке","values":[2742600.0,2827600],"unit":"авто","period":"На 1 января","sources":["park-mo"],"note":"Архив на 1 января 2025 года восстановлен из объёма на 1 января 2026 года и опубликованного темпа.","approx":[true,true],"yoy":3.1},{"id":"newCars","label":"Регистрации новых легковых","values":[14155,9923],"unit":"авто","period":"Октябрь","sources":["new-oct"],"note":"Объём 2025 года рассчитан из опубликованного округлённого темпа.","approx":[true,false],"yoy":-29.9},{"id":"usedCars","label":"Объём рынка легковых с пробегом","values":[255900.0,263600],"unit":"авто","period":"Январь–сентябрь","sources":["used-nine"],"note":"Объём 2025 года рассчитан из опубликованного округлённого темпа.","approx":[true,true],"yoy":3},{"id":"avgAge","label":"Средний возраст легковых в парке","values":[null,null],"unit":"лет","period":"На 1 января","sources":["park-mo"],"note":"Два значения по одному определению не подтверждены.","approx":[false,false]},{"id":"oldShare","label":"Доля легковых старше 10 лет","values":[null,64.3],"unit":"% парка","period":"На 1 января","sources":["park-mo"],"note":"На дату 2026 года опубликована возрастная структура. Сопоставимой базы на 2025 год нет.","approx":[false,false],"change":"points"}]}],"publicCount":45},"moscow":{"label":"Москва","territory":"Москва","stats":{"total":1127,"confirmed":164,"candidates":963,"call":41,"wrapOnly":34,"tintOnly":115,"both":15,"phones":75,"withAmounts":6,"cities":[["Москва",1127]],"sources":[["2ГИС",962],["Яндекс",163],["2ГИС + Яндекс",2]],"pricePositions":12,"prices":[{"label":"Оклейка · весь кузов","count":2,"low":250000,"high":260000,"fromCount":0},{"label":"Оклейка · зоны риска / передняя часть","count":3,"low":60000,"high":150000,"fromCount":0},{"label":"Оклейка · отдельный элемент","count":1,"low":20000,"high":20000,"fromCount":0},{"label":"Тонировка · задняя полусфера","count":1,"low":6000,"high":6000,"fromCount":0}]},"market":[{"title":"Население","description":"Москва — отдельный субъект РФ.","metrics":[{"id":"population","label":"Постоянное население","values":[13274300,null],"unit":"чел.","period":"На 1 января","sources":["msk-pop"],"note":"Число на 01.01.2025 округлено Мосстатом до сотен. Сопоставимая оценка на 01.01.2026 не подтверждена.","approx":[false,false]}]},{"title":"Доходы, расходы и рейтинг","description":"Город федерального значения в своих административных границах.","metrics":[{"id":"income","label":"Среднедушевой денежный доход","values":[150214,null],"unit":"₽/мес.","period":"II квартал","sources":["income25","mos-income26"],"note":"В секции доходов показываются подтверждённые значения.","approx":[false,false]},{"id":"spending","label":"Потребительские расходы на жителя","values":[97543,107389],"unit":"₽/мес.","period":"II квартал","sources":["income25","mos-income26"],"note":"","approx":[false,false]},{"id":"salary","label":"Средняя начисленная зарплата","values":[161101,176138],"unit":"₽/мес.","period":"Август","sources":["salary"],"note":"","approx":[false,false]},{"id":"rank","label":"Место по средней начисленной зарплате","values":[4,4],"unit":"из 83 территорий","period":"Август","sources":["salary"],"note":"Место вычислено по значениям каждого года независимо.","approx":[false,false],"change":"rank"}]},{"title":"Предпринимательство","description":"Единый реестр МСП.","metrics":[{"id":"sme","label":"Субъекты МСП","values":[910383,914792],"unit":"юрлиц и ИП","period":"На 10 января","sources":["sme"],"note":"","approx":[false,false]}]},{"title":"Легковые автомобили","description":"Каждая строка использует свой единый период и определение.","metrics":[{"id":"passengerStock","label":"Легковые в зарегистрированном парке","values":[3945200.0,4004400],"unit":"авто","period":"На 1 января","sources":["park-moscow"],"note":"Архив на 1 января 2025 года восстановлен из объёма на 1 января 2026 года и опубликованного темпа.","approx":[true,true],"yoy":1.5},{"id":"newCars","label":"Регистрации новых легковых","values":[25562,19836],"unit":"авто","period":"Октябрь","sources":["new-oct"],"note":"Объём 2025 года рассчитан из опубликованного округлённого темпа.","approx":[true,false],"yoy":-22.4},{"id":"usedCars","label":"Объём рынка легковых с пробегом","values":[262000.0,288200],"unit":"авто","period":"Январь–сентябрь","sources":["used-nine"],"note":"Объём 2025 года рассчитан из опубликованного округлённого темпа.","approx":[true,true],"yoy":10},{"id":"avgAge","label":"Средний возраст легковых в парке","values":[null,12.1],"unit":"лет","period":"На 1 января","sources":["park-moscow"],"note":"Два значения по одному определению не подтверждены.","approx":[false,false]},{"id":"oldShare","label":"Доля легковых старше 10 лет","values":[null,54.5],"unit":"% парка","period":"На 1 января","sources":["park-moscow"],"note":"На дату 2026 года опубликована возрастная структура. Сопоставимой базы на 2025 год нет.","approx":[false,false],"change":"points"}]}],"publicCount":211}}}</script>
   <script>function calculate(points,margin=20,base=0){
  const n=Number(points),m=Number(margin);
  points=Math.min(1000000,Math.max(0,Math.floor(Number.isFinite(n)?n:0)));
@@ -241,8 +322,8 @@ input[type=range]{accent-color:var(--teal);width:100%}
 
 (()=>{
 'use strict';
-const defaultBasket = {tintQty: 0, tintPrice: 14000, athermQty: 0, athermPrice: 18000, ppfQty: 5, ppfPrice: 52000};
-const defaultTarget = 10;
+const defaultBasket = {tintQty: 0, tintPrice: 13000, athermQty: 0, athermPrice: 30000, ppfQty: 5, ppfPrice: 52000};
+const defaultTarget = 20;
 function scenarioKey() { return 'fx-moscow-mo-model-v2-' + view().territory; }
 function scenarioChoices() { return [...new Set([10, 25, 50, 100].filter(n => n < S.total).concat(S.total))]; }
 const products = [['Тонировочная', 'tint'], ['Атермальная', 'atherm'], ['Полиуретановая', 'ppf']];
@@ -314,11 +395,153 @@ function updateBasketInput(input) {
 }
 
 
-function calculator(){return `${heading('Калькулятор продаж','Укажите число подключённых точек. Все показатели пересчитываются сразу.',`<button class="button secondary" id="shareCalc">Копировать расчёт ↗</button>`)}<section class="card basket-card"><div><p class="basket-caption">Модель продаж · средняя закупка одной точки за месяц</p><h3><span data-basket-rolls></span> рул. → <span class="big-number" data-basket-total></span></h3><p class="fine">При маржинальности <span data-point-model-out="margin"></span>% — <strong><span data-point-model-out="contribution"></span> маржинального дохода</strong> с точки в месяц. Скидки и промо уже учтены в марже.</p></div><div class="basket-mini" id="basketSummary"></div></section>${basketSettings()}<div class="calc-layout"><section class="card calc-inputs"><label for="points">Количество подключённых точек</label><div class="points-control"><input id="points" type="number" min="0" max="1000000" step="1" inputmode="numeric" value="${state.calc.points}"><span>точек</span></div><input id="pointsRange" type="range" min="0" max="${S.total}" step="1" value="${Math.min(S.total,state.calc.points)}" aria-label="Количество подключённых точек, ползунок"><div class="range-ends"><span>0</span><span>${S.total} — вся подтвержденная база</span></div><div class="quick-picks">${scenarioChoices().map(n=>`<button data-points="${n}">${n}</button>`).join('')}</div><div class="margin-line"><label for="margin">Маржинальность, %</label><input type="number" id="margin" min="0" max="100" step="0.1" inputmode="decimal" value="${state.calc.margin}"></div><p class="fine">По умолчанию 20% — с учётом скидок и промо. Дополнительно вычитать скидки из расчёта не нужно.</p><div class="progress-card"><div class="progress-caption"><span>Доля подтвержденной базы в сценарии</span><strong id="progressText"></strong></div><div class="track" id="connectionProgress" role="progressbar" aria-label="Число точек сценария относительно подтвержденной базы" aria-valuemin="0" aria-valuemax="${S.total}"><span id="progressFill"></span></div><p class="fine" id="progressDescription"></p></div><p class="calc-note">Сценарий сохраняется в этом браузере. Фактические подключения и цель продаж в базе не ведутся.</p></section><div class="calc-results"><div class="result primary"><p>Оборот в месяц</p><div class="big-number" data-out="turnover"></div><small><span data-out="points"></span> точек × <span data-basket-total></span></small></div><div class="result teal"><p>Маржинальный доход в месяц</p><div class="big-number" data-out="contribution"></div><small>Оборот × <span data-out="margin"></span>%</small></div><div class="result"><p>Оборот за 12 месяцев</p><div class="big-number" data-out="annualTurnover"></div><small>При одинаковом числе точек каждый месяц</small></div><div class="result"><p>Маржинальный доход за 12 месяцев</p><div class="big-number" data-out="annualContribution"></div><small>При неизменной маржинальности</small></div></div></div><section class="card calc-basket"><div class="card-head"><h3>Из чего складывается оборот</h3><span class="fine">1 точка · <span data-basket-rolls></span> рул. в месяц</span></div><div class="table-wrap"><table class="basket-table"><thead><tr><th>Плёнка</th><th class="numeric">На точку, рул.</th><th class="numeric">Цена рулона</th><th class="numeric">Всего рулонов / месяц</th><th class="numeric">Оборот / месяц</th></tr></thead><tbody id="liveBasket"></tbody><tfoot><tr><td>Итого</td><td class="numeric" data-basket-rolls></td><td class="numeric"><span data-basket-total></span> / точка</td><td class="numeric" data-out="rolls"></td><td class="numeric" data-out="turnover"></td></tr></tfoot></table></div><p class="calc-note">Модель предполагает одинаковую закупку на каждой подключённой точке. Маржинальный доход = оборот × маржинальность. Это не чистая прибыль: операционные расходы и налоги отдельно не моделируются.</p></section><section class="card wide-card"><h3>Сценарии подключения</h3><div class="table-wrap"><table class="scenario-table"><thead><tr><th>Точек</th><th class="numeric">Оборот / месяц</th><th class="numeric">Маржинальный доход / месяц</th><th class="numeric">Рулонов / месяц</th></tr></thead><tbody id="scenarios"></tbody></table></div><div class="callout"><strong>Сценарий 100% подключения</strong><p>Все ${num(S.total)} подтвержденных точек: <strong data-full-base-out="turnover"></strong> оборота и <strong data-full-base-out="contribution"></strong> маржинального дохода в месяц при маржинальности <span data-full-base-out="margin"></span>%.</p><p class="fine">Расчётный потенциал текущей выборки. Фактические подключения и продажи не установлены.</p></div></section>`}
+function calculator(){return `${heading('Калькулятор продаж','Укажите число подключённых точек. Все показатели пересчитываются сразу.',`<button class="button secondary" id="shareCalc">Копировать расчёт ↗</button>`)}<section class="card basket-card"><div><p class="basket-caption">Модель продаж · средняя закупка одной точки за месяц</p><h3><span data-basket-rolls></span> рул. → <span class="big-number" data-basket-total></span></h3><p class="fine">При маржинальности <span data-point-model-out="margin"></span>% — <strong><span data-point-model-out="contribution"></span> маржинального дохода</strong> с точки в месяц. Скидки и промо уже учтены в марже.</p></div><div class="basket-mini" id="basketSummary"></div></section>${basketSettings()}<div class="calc-layout"><section class="card calc-inputs"><label for="points">Количество подключённых точек</label><div class="points-control"><input id="points" type="number" min="0" max="1000000" step="1" inputmode="numeric" value="${state.calc.points}"><span>точек</span></div><input id="pointsRange" type="range" min="0" max="${S.total}" step="1" value="${Math.min(S.total,state.calc.points)}" aria-label="Количество подключённых точек, ползунок"><div class="range-ends"><span>0</span><span>${S.total} — вся подтверждённая база</span></div><div class="quick-picks">${scenarioChoices().map(n=>`<button data-points="${n}">${n}</button>`).join('')}</div><div class="margin-line"><label for="margin">Маржинальность, %</label><input type="number" id="margin" min="0" max="100" step="0.1" inputmode="decimal" value="${state.calc.margin}"></div><p class="fine">По умолчанию 20% — с учётом скидок и промо. Дополнительно вычитать скидки из расчёта не нужно.</p><div class="progress-card"><div class="progress-caption"><span>Доля подтверждённой базы в сценарии</span><strong id="progressText"></strong></div><div class="track" id="connectionProgress" role="progressbar" aria-label="Число точек сценария относительно подтверждённой базы" aria-valuemin="0" aria-valuemax="${S.total}"><span id="progressFill"></span></div><p class="fine" id="progressDescription"></p></div><p class="calc-note">Сценарий сохраняется в этом браузере. Фактические подключения и цель продаж в базе не ведутся.</p></section><div class="calc-results"><div class="result primary"><p>Оборот в месяц</p><div class="big-number" data-out="turnover"></div><small><span data-out="points"></span> точек × <span data-basket-total></span></small></div><div class="result teal"><p>Маржинальный доход в месяц</p><div class="big-number" data-out="contribution"></div><small>Оборот × <span data-out="margin"></span>%</small></div><div class="result"><p>Оборот за 12 месяцев</p><div class="big-number" data-out="annualTurnover"></div><small>При одинаковом числе точек каждый месяц</small></div><div class="result"><p>Маржинальный доход за 12 месяцев</p><div class="big-number" data-out="annualContribution"></div><small>При неизменной маржинальности</small></div></div></div><section class="card calc-basket"><div class="card-head"><h3>Из чего складывается оборот</h3><span class="fine">1 точка · <span data-basket-rolls></span> рул. в месяц</span></div><div class="table-wrap"><table class="basket-table"><thead><tr><th>Плёнка</th><th class="numeric">На точку, рул.</th><th class="numeric">Цена рулона</th><th class="numeric">Всего рулонов / месяц</th><th class="numeric">Оборот / месяц</th></tr></thead><tbody id="liveBasket"></tbody><tfoot><tr><td>Итого</td><td class="numeric" data-basket-rolls></td><td class="numeric"><span data-basket-total></span> / точка</td><td class="numeric" data-out="rolls"></td><td class="numeric" data-out="turnover"></td></tr></tfoot></table></div><p class="calc-note">Модель предполагает одинаковую закупку на каждой подключённой точке. Маржинальный доход = оборот × маржинальность. Это не чистая прибыль: операционные расходы и налоги отдельно не моделируются.</p></section><section class="card wide-card"><h3>Сценарии подключения</h3><div class="table-wrap"><table class="scenario-table"><thead><tr><th>Точек</th><th class="numeric">Оборот / месяц</th><th class="numeric">Маржинальный доход / месяц</th><th class="numeric">Рулонов / месяц</th></tr></thead><tbody id="scenarios"></tbody></table></div><div class="callout"><strong>Сценарий 100% подключения</strong><p>Все ${num(S.total)} подтверждённых точек: <strong data-full-base-out="turnover"></strong> оборота и <strong data-full-base-out="contribution"></strong> маржинального дохода в месяц при маржинальности <span data-full-base-out="margin"></span>%.</p><p class="fine">Расчётный потенциал текущей выборки. Фактические подключения и продажи не установлены.</p></div></section>`}
 function updateCalc(){const c=state.calc;renderBasket(c);const perPoint=calculateRegional(1,c.margin,S.total),fullBase=calculateRegional(S.total,c.margin,S.total);document.querySelectorAll('[data-point-model-out]').forEach(el=>{const k=el.dataset.pointModelOut;el.textContent=k==='margin'?num(perPoint[k]):money(perPoint[k])});document.querySelectorAll('[data-full-base-out]').forEach(el=>{const k=el.dataset.fullBaseOut;el.textContent=k==='margin'?num(fullBase[k]):money(fullBase[k])});document.querySelectorAll('[data-out]').forEach(el=>{const k=el.dataset.out;el.textContent=['points','rolls','margin'].includes(k)?num(c[k]):money(c[k])});
- document.getElementById('progressText').textContent=pct(c.share);document.getElementById('progressFill').style.width=c.progress+'%';document.getElementById('connectionProgress').setAttribute('aria-valuenow',Math.min(c.points,S.total));document.getElementById('connectionProgress').setAttribute('aria-valuetext',`${c.points} из ${S.total} точек`);document.getElementById('progressDescription').textContent=c.points<=S.total?`${num(c.points)} из ${num(S.total)} подтвержденных точек.`:`На ${num(c.points-S.total)} точек больше текущей выборки. Число можно задать для расширенного сценария.`;document.getElementById('pointsRange').value=Math.min(c.points,S.total);
+ document.getElementById('progressText').textContent=pct(c.share);document.getElementById('progressFill').style.width=c.progress+'%';document.getElementById('connectionProgress').setAttribute('aria-valuenow',Math.min(c.points,S.total));document.getElementById('connectionProgress').setAttribute('aria-valuetext',`${c.points} из ${S.total} точек`);document.getElementById('progressDescription').textContent=c.points<=S.total?`${num(c.points)} из ${num(S.total)} подтверждённых точек.`:`На ${num(c.points-S.total)} точек больше текущей выборки. Число можно задать для расширенного сценария.`;document.getElementById('pointsRange').value=Math.min(c.points,S.total);
  document.getElementById('scenarios').innerHTML=scenarioChoices().map(n=>{const x=calculateRegional(n,c.margin,S.total);return `<tr><td><button data-points="${n}" aria-label="Рассчитать ${n} точек">${num(n)}</button>${n===S.total?' <small class="muted">вся база</small>':''}</td><td class="numeric">${money(x.turnover)}</td><td class="numeric">${money(x.contribution)}</td><td class="numeric">${num(x.rolls)}</td></tr>`}).join('');try{localStorage.setItem(scenarioKey(),JSON.stringify({points:c.points,margin:c.margin,basket,target}))}catch{}}
 // Mounted inside the app closure. All quantitative values come from reviewed rows.
+
+const catalogPageSize = 24;
+const catalogFilters = {};
+const profileGroups = {
+  wrap: ['Оклейка', 'Обе услуги'],
+  tint: ['Тонировка', 'Обе услуги'],
+  both: ['Обе услуги'],
+  candidate: ['Требует проверки'],
+};
+const sourceNames = {'Яндекс': 'Яндекс Карты', '2ГИС': '2ГИС', 'Сайт': 'Сайт'};
+const compareText = new Intl.Collator('ru', {numeric: true}).compare;
+const catalogPlural = new Intl.PluralRules('ru');
+const normalizeSearch = text => text.trim().toLocaleLowerCase('ru').replace(/ё/g, 'е');
+const catalogRequests = new Map();
+
+function loadCatalog(key) {
+  if (!catalogRequests.has(key)) {
+    const request = fetch(`public-leads.json?v=${encodeURIComponent(DATA.revision)}`)
+      .then(response => {
+        if (!response.ok) throw new Error('Catalog unavailable');
+        return response.json();
+      })
+      .then(cards => {
+        if (!Array.isArray(cards)) throw new Error('Invalid catalog');
+        const scoped = cards.filter(card => Boolean(card.isMoscow) === (key === 'moscow'));
+        return scoped.sort((a, b) => Number(a.profile === 'Требует проверки') - Number(b.profile === 'Требует проверки') ||
+          compareText(a.city, b.city) || compareText(a.name, b.name) || compareText(a.id, b.id));
+      })
+      .catch(error => { catalogRequests.delete(key); throw error; });
+    catalogRequests.set(key, request);
+  }
+  return catalogRequests.get(key);
+}
+
+function catalogLink(url, label) {
+  if (!/^https:\/\/\S+$/i.test(url || '')) return '';
+  return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`;
+}
+
+function catalogCard(card) {
+  const links = card.sources.map(source => catalogLink(source.url, sourceNames[source.source] || source.source));
+  const qualification = card.profile === 'Требует проверки' ? 'Кандидат' : card.profile;
+  return `<article class="card catalog-card" data-public-lead-id="${esc(card.id)}">
+    <small>${esc(card.city || 'Не указан')}</small><h3>${esc(card.name)}</h3><strong>${esc(qualification)}</strong>
+    <p class="catalog-links">${links.join('') || 'Ссылка на карты уточняется'}</p>
+  </article>`;
+}
+
+function filterCatalog(cards, filters) {
+  const query = normalizeSearch(filters.query);
+  const profiles = profileGroups[filters.profile];
+  return cards.filter(card => {
+    const candidate = card.profile === 'Требует проверки';
+    const qualified = filters.qualification === 'all' || candidate === (filters.qualification === 'candidate');
+    return qualified && (!profiles || profiles.includes(card.profile)) &&
+      normalizeSearch([card.name, card.city, card.id].join(' ')).includes(query);
+  });
+}
+
+function renderCatalog() {
+  const selectedArea = area;
+  const saved = catalogFilters[selectedArea] ??= {query: '', profile: 'all', qualification: 'all', start: 0};
+  const cabinet = new URL('cabinet.html#leads', location.href);
+  cabinet.searchParams.set('area', selectedArea);
+  crmTab.innerHTML = hero('Список ЛИДов', 'Ранее опубликованная выборка · полная база в Google Таблице и CRM') + `
+    <div class="catalog-layout">
+      <aside class="card catalog-nav" aria-label="Рабочие разделы">
+        <h2>ЛИДы и СРМ</h2>
+        <a class="button primary" href="${esc(cabinet.href)}">Заявки · вход в CRM ↗</a>
+      </aside>
+      <div class="catalog-results">
+        <section class="card catalog-filters" aria-label="Фильтры списка ЛИДов">
+          <label>Название, населённый пункт или ID<input type="search" id="catalogQuery" value="${esc(saved.query)}" autocomplete="off"></label>
+          <label>Услуга<select id="catalogProfile"><option value="all">Все</option><option value="wrap">Оклейка</option><option value="tint">Тонировка</option>
+            <option value="both">Обе услуги</option></select></label>
+          <label>Квалификация<select id="catalogQualification"><option value="all">Все</option><option value="confirmed">Подтверждённые</option><option value="candidate">Кандидаты</option></select></label>
+        </section>
+        <p class="fine" id="catalogCount" role="status">Загружаю список ЛИДов…</p>
+        <div class="catalog-list" id="catalogList"></div>
+        <p class="catalog-pager">
+          <button class="button secondary" id="catalogPrevious" type="button" disabled>Назад</button>
+          <button class="button secondary" id="catalogNext" type="button" disabled>Дальше</button>
+        </p>
+      </div>
+    </div>`;
+
+  const find = id => document.getElementById(id);
+  const search = find('catalogQuery');
+  const profile = find('catalogProfile');
+  const qualification = find('catalogQualification');
+  const count = find('catalogCount');
+  const list = find('catalogList');
+  const previous = find('catalogPrevious');
+  const next = find('catalogNext');
+  let territoryCards;
+  profile.value = saved.profile;
+  qualification.value = saved.qualification;
+
+  function displayRows() {
+    if (!territoryCards) return;
+    const rows = filterCatalog(territoryCards, saved);
+    const lastPage = Math.max(0, Math.ceil(rows.length / catalogPageSize) - 1) * catalogPageSize;
+    saved.start = Math.min(saved.start, lastPage);
+    const end = Math.min(saved.start + catalogPageSize, rows.length);
+    const first = rows.length ? saved.start + 1 : 0;
+    const total = territoryCards.length;
+    const noun = {one: 'карточка', few: 'карточки'}[catalogPlural.select(total)] || 'карточек';
+    count.textContent = `Показано ${num(first)}–${num(end)} из ${num(rows.length)} · в срезе ${num(total)} ${noun}`;
+    list.innerHTML = rows.slice(saved.start, end).map(catalogCard).join('') ||
+      '<p class="card">По этим фильтрам карточек нет.</p>';
+    previous.disabled = saved.start === 0;
+    next.disabled = end === rows.length;
+  }
+
+  function updateFilters() {
+    Object.assign(saved, {query: search.value, profile: profile.value, qualification: qualification.value, start: 0});
+    displayRows();
+  }
+
+  async function showCatalog() {
+    count.textContent = 'Загружаю список ЛИДов…';
+    list.replaceChildren();
+    try {
+      const cards = await loadCatalog(selectedArea);
+      if (!list.isConnected) return;
+      territoryCards = cards;
+      displayRows();
+    } catch {
+      if (!list.isConnected) return;
+      count.textContent = 'Не удалось загрузить список ЛИДов.';
+      list.innerHTML = '<button class="button secondary" type="button">Повторить загрузку</button>';
+      list.firstElementChild.onclick = showCatalog;
+    }
+  }
+
+  search.addEventListener('input', updateFilters);
+  profile.addEventListener('change', updateFilters);
+  qualification.addEventListener('change', updateFilters);
+  previous.onclick = () => { saved.start -= catalogPageSize; displayRows(); };
+  next.onclick = () => { saved.start += catalogPageSize; displayRows(); };
+  void showCatalog();
+}
 
 const DATA = JSON.parse(document.getElementById('public-data').textContent);
 const main = document.getElementById('main');
@@ -338,7 +561,7 @@ const formatDate = value => value.split('-').reverse().join('.');
 const getArea = () => new URLSearchParams(location.search).get('area') === 'moscow' ? 'moscow' : 'region';
 const getSection = () => {
   const hash = location.hash.slice(1);
-  if (hash === 'calculator') return 'model';
+  if (['calculator', 'sales'].includes(hash)) return 'model';
   if (['overview', 'prices'].includes(hash)) return 'leads';
   return validSections.includes(hash) ? hash : 'market';
 };
@@ -347,7 +570,6 @@ let area = getArea();
 let query = new URLSearchParams(location.search);
 let S = modelBase();
 const state = {calc: null};
-let frame;
 let toastTimer;
 loadModel();
 
@@ -355,7 +577,7 @@ if (window !== parent && query.get('embedded') === 'crm') {
   document.documentElement.classList.add('embedded');
 }
 document.getElementById('footerDate').textContent =
-  'База исследования · ' + formatDate(DATA.dataDate) + '    |    Сборка · ' + formatDate(DATA.researchDate);
+  'База лидов · ' + formatDate(DATA.dataDate) + '    |    Экономика · ' + formatDate(DATA.economyDate);
 
 function modelBase() {
   return {total: view().stats.confirmed};
@@ -365,7 +587,7 @@ function loadModel() {
   basket = {...defaultBasket};
   target = defaultTarget;
   const saved = readScenario();
-  state.calc = calculateRegional(query.get('points') ?? saved?.points ?? 10,
+  state.calc = calculateRegional(query.get('points') ?? saved?.points ?? 20,
     query.get('margin') ?? saved?.margin ?? 20, S.total);
 }
 
@@ -381,9 +603,9 @@ function heading(title, description, aside = '') {
   return `<div class="section-heading"><div><h2>${title}</h2><p>${description}</p></div>${aside}</div>`;
 }
 
-function hero(title, description = '') {
+function hero(title, description = '', checked = DATA.researchDate) {
   return `<section class="hero"><span class="cut" aria-hidden="true"></span>
-    <div class="hero-meta"><span class="tag">${esc(view().label)}</span><span class="tag">Проверено ${formatDate(DATA.researchDate)}</span></div>
+    <div class="hero-meta"><span class="tag">${esc(view().label)}</span><span class="tag">Проверено ${formatDate(checked)}</span></div>
     <h1>${esc(title)}</h1>${description ? `<p>${esc(description)}</p>` : ''}</section>`;
 }
 
@@ -402,9 +624,9 @@ function metric(item) {
 }
 
 function seriesLegend(items, colors, total) {
-  return `<ul class="legend">${items.map(([label, value], index) =>
+  return `<ul class="legend">${items.map(([label, value, display = num(value)], index) =>
     `<li><i class="legend-dot" style="--datum:${colors[index % colors.length]}" aria-hidden="true"></i><span>${esc(label)}</span>
-      <strong>${num(value)} <small>${pct(value / total * 100)}</small></strong></li>`).join('')}</ul>`;
+      <strong>${esc(display)} <small>${pct(value / total * 100)}</small></strong></li>`).join('')}</ul>`;
 }
 
 function donut(items, center) {
@@ -429,8 +651,8 @@ function bars(items) {
 
 function columns(items, unit) {
   const upper = Math.max(...items.map(([, value]) => value), 1) * 1.2;
-  return `<div class="columns" role="group" aria-label="${esc(unit || 'Значения')}">${items.map(([label,value]) =>
-    `<div class="column"><div class="column-plot"><strong>${num(value)}</strong><span style="height:${100 * value / upper}%" aria-hidden="true"></span></div><small>${esc(label)}</small></div>`).join('')}</div>`;
+  return `<div class="columns" role="group" aria-label="${esc(unit || 'Значения')}">${items.map(([label, value, display = num(value)]) =>
+    `<div class="column"><div class="column-plot"><strong>${esc(display)}</strong><span style="height:${100 * value / upper}%" aria-hidden="true"></span></div><small>${esc(label)}</small></div>`).join('')}</div>`;
 }
 
 function chart(item) {
@@ -443,55 +665,140 @@ function chart(item) {
 
 function market() {
   const sections = view().market;
-  const ids = [...new Set(sections.flatMap(section => [...section.metrics, ...section.charts].map(item => item.source)))];
-  return hero(view().territory, 'Население, покупательский контекст и автомобильный рынок') +
-    sections.map(section => `<section class="block"><header class="block-head"><div><h2>${esc(section.title)}</h2>
-    <p>${esc(section.description)}</p></div></header><div class="metric-grid">${section.metrics.map(metric).join('')}</div>
-    <div class="chart-grid">${section.charts.map(chart).join('')}</div></section>`).join('') +
-    marketTable(sections) +
+  const metrics = sections.flatMap(section => section.metrics);
+  const ids = [...new Set(metrics.flatMap(item => item.sources).concat(['ru-new','ru-used']))];
+  const byId = Object.fromEntries(metrics.filter(item => item.id).map(item => [item.id, item]));
+  return hero(view().territory, 'Экономика · сопоставимые периоды 2025 и 2026 годов', DATA.economyDate) +
+    economyOverview(byId) +
+    `<section class="block economy-detail" aria-labelledby="economy-detail-title"><h2 id="economy-detail-title">Все показатели и периоды</h2>
+    <p class="fine economy-intro">Δ показывает изменение к 2025 году. ≈ обозначает расчёт или округление. Прочерк означает, что значение из сопоставимого источника не подтверждено.</p>` +
+    sections.map(section => `<section class="card block economy-section"><header class="block-head"><div><h3>${esc(section.title)}</h3>
+    <p>${esc(section.description)}</p></div></header>${marketTable(section.metrics)}</section>`).join('') + `</section>` +
     `<section class="card block"><h2>Источники и методика</h2><details class="source-details"><summary>Открыть список источников</summary>
     <ul class="source-list">${ids.map(id => `<li>${sourceLink(id)}<p>${esc(DATA.sources[id].note)}</p></li>`).join('')}</ul></details></section>`;
 }
 
-function marketTable(sections) {
-  return `<section class="card block"><h2>Все рыночные показатели</h2>
-    <div class="table-wrap"><table class="range-table"><thead><tr><th>Показатель</th><th class="numeric">Значение</th><th>Период и охват</th><th>Источник</th></tr></thead>
-    <tbody>${sections.flatMap(section => section.metrics).map(item => `<tr><td>${esc(item.label)}</td>
-    <td class="numeric">${item.approx?'≈ ':''}${num(item.value)} ${esc(item.unit || '')}</td>
-    <td>${esc(item.period)}</td><td>${sourceLink(item.source)}</td></tr>`).join('')}</tbody></table></div></section>`;
+function economyOverview(data) {
+  const isRegion = area === 'region';
+  const highlights = [[data.population, 'Постоянное население'],
+    [isRegion ? data.income : data.salary, isRegion ? 'Доход на жителя' : 'Средняя зарплата'],
+    [data.sme, 'Малый и средний бизнес'], [data.passengerStock, 'Легковые в парке']];
+  const comparison = data.passengerStock;
+  const changes = [['Доход на жителя', data.income], ['Средняя зарплата', data.salary],
+    ['Малый и средний бизнес', data.sme], ['Новые легковые · октябрь', data.newCars],
+    ['С пробегом · январь–сентябрь', data.usedCars]];
+  return `<section class="economy-key" aria-labelledby="economy-key-title"><h2 id="economy-key-title">Ключевые показатели · 2026</h2>
+    <div class="metric-grid economy-metrics">${highlights.map(([item, label]) => economyTile(item, label)).join('')}</div></section>
+    <div class="economy-visuals">
+      <section class="card economy-compare"><div class="chart-head"><h2>${esc(comparison.label)}</h2>
+      <p class="fine">${esc(comparison.period)} · ${esc(comparison.unit)}</p></div>
+      ${columns(comparison.values.map((value, index) => [2025 + index, value, economyValue(comparison, index)]), comparison.label + ', ' + comparison.unit)}
+      <div class="economy-chart-footer"><span class="economy-delta">${economyChange(comparison)} к 2025</span>${sourceLink(comparison.sources[0])}</div></section>
+      ${registrationMix(DATA.economyContext.new, DATA.economyContext.used)}
+      ${economyGrowth(changes)}
+    </div>`;
+}
+
+function economyTile(item, label) {
+  return `<dl class="metric economy-tile"><dt>${esc(label)}</dt><dd>${economyValue(item, 1)} <small>${esc(item.unit)}</small></dd>
+    <dd class="economy-tile-meta"><div class="economy-tile-baseline"><span>2025 · ${economyValue(item, 0)}</span><span class="economy-delta">${economyChange(item)}</span></div>
+    <p>${esc(item.period)}</p></dd></dl>`;
+}
+
+function registrationMix(newCars, usedCars) {
+  const rings = newCars.values.map((value, index) => {
+    const total = value + usedCars.values[index];
+    const center = (newCars.approx?.[index] || usedCars.approx?.[index] ? '≈ ' : '') + compact.format(total);
+    return `<div class="economy-ring"><h3>${2025 + index}</h3>${donut([
+      ['Новые', value, economyValue(newCars, index)], ['С пробегом', usedCars.values[index], economyValue(usedCars, index)],
+    ], center)}</div>`;
+  }).join('');
+  return `<section class="card economy-mix"><div class="chart-head"><h2>Состав регистраций легковых · Россия</h2>
+    <p class="fine">${esc(newCars.period)} · общероссийский контекст</p></div>
+    <div class="economy-rings">${rings}</div>
+    <p class="chart-note">Доли от суммы регистраций новых и перерегистраций легковых с пробегом. Знаменатель — все операции этих двух групп по России.</p>
+    <div class="economy-chart-sources">${sourceLink(newCars.sources[0], 'Новые')}${sourceLink(usedCars.sources[0], 'С пробегом')}</div></section>`;
+}
+
+function economyGrowth(items) {
+  items = items.filter(([, item]) => item.values.every(Number.isFinite) && item.values[0] > 0);
+  const rates = items.map(([, item]) => economyRate(item));
+  const maximum = Math.max(1, ...rates.map(Math.abs));
+  return `<section class="card economy-growth"><div class="chart-head"><h2>Изменение к 2025 году</h2>
+    <p class="fine">${esc(view().label)} · в процентах</p></div>
+    <ul class="bars">${items.map(([label, item], index) => {
+      const rate = rates[index];
+      const width = Math.abs(rate) / maximum * 50;
+      return `<li><div class="bar-row"><span>${esc(label)}</span><strong>${economyChange(item)}</strong></div>
+        <div class="economy-track" aria-hidden="true"><span class="${rate < 0 ? 'negative' : ''}" style="--from:${rate < 0 ? 50 - width : 50}%;--width:${width}%"></span></div></li>`;
+    }).join('')}</ul></section>`;
+}
+
+function economyValue(item, index) {
+  if (!Number.isFinite(item.values[index])) return '—';
+  return `${item.approx?.[index] ? '≈ ' : ''}${num(item.values[index])}`;
+}
+
+function economyRate(item) {
+  const [previous, current] = item.values;
+  return item.yoy ?? (current / previous - 1) * 100;
+}
+
+function economyChange(item) {
+  if (!item.values.every(Number.isFinite) || (!item.change && item.values[0] === 0)) return '—';
+  const [previous, current] = item.values;
+  const difference = current - previous;
+  if (item.change === 'rank') return difference ? `${difference < 0 ? '↑' : '↓'} ${num(Math.abs(difference))} поз.` : '0 поз.';
+  const points = item.change === 'points';
+  const value = Math.round((points ? difference : economyRate(item)) * 100) / 100;
+  return `${value > 0 ? '+' : ''}${num(value)}${points ? ' п. п.' : '%'}`;
+}
+
+function economyValues(item) {
+  const maximum = Math.max(...item.values, 1);
+  return item.values.map((value, index) => `<td class="numeric" data-year="${2025 + index}">${economyValue(item, index)}
+    ${!Number.isFinite(value) || item.change === 'rank' ? '' : `<span class="economy-bar" aria-hidden="true" style="--fill:${value / maximum * 100}%"></span>`}</td>`).join('');
+}
+
+function marketTable(items) {
+  return `<table class="economy-table"><thead><tr><th scope="col">Показатель и период</th><th scope="col" class="numeric">2025</th><th scope="col" class="numeric">2026</th><th scope="col" class="numeric">Δ к 2025</th></tr></thead>
+    <tbody>${items.map(item => `<tr><th scope="row"><strong>${esc(item.label)}</strong><span class="economy-period">${esc(item.period)}${item.unit ? ` · ${esc(item.unit)}` : ''}</span>
+    ${item.note ? `<small class="economy-period">${esc(item.note)}</small>` : ''}<span class="economy-sources">${item.sources.map(id => sourceLink(id)).join('')}</span></th>
+    ${economyValues(item)}
+    <td class="numeric economy-change" data-year="Изменение">${economyChange(item)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 function leads() {
   const s = view().stats;
   const topCities = s.cities.slice(0, 7);
   const other = s.cities.slice(7).reduce((total, [, count]) => total + count, 0);
-  if (other) topCities.push(['Прочие населенные пункты', other]);
+  if (other) topCities.push(['Прочие населённые пункты', other]);
   const period = 'Срез ' + formatDate(DATA.dataDate);
   const cards = [
     {label:'Точек исследовано',value:s.total,period},
-    {label:'Профиль подтвержден',value:s.confirmed,period:pct(s.confirmed/s.total*100)+' от исследованных'},
-    {label:'Кандидаты',value:s.candidates,period:'Услуга требует проверки'},
+    {label:'Профиль подтверждён',value:s.confirmed,period:pct(s.confirmed/s.total*100)+' от исследованных'},
+    {label:'К обзвону',value:s.call,period:num(s.candidates)+' кандидатов требуют проверки услуги'},
     {label:'Точки с ценами',value:s.withAmounts,period:num(s.pricePositions)+' опубликованных позиций'},
   ];
   const charts = [
-    {title:'Квалификация',type:'donut',items:[['Подтвержденные',s.confirmed],['Кандидаты',s.candidates]]},
-    {title:'Подтвержденные услуги',type:'donut',items:[['Тонировка',s.tintOnly],['Оклейка',s.wrapOnly],['Обе услуги',s.both]],subtitle:'Три непересекающиеся группы'},
+    {title:'Квалификация',type:'donut',items:[['Подтверждённые',s.confirmed],['Кандидаты',s.candidates]]},
+    {title:'Подтверждённые услуги',type:'donut',items:[['Тонировка',s.tintOnly],['Оклейка',s.wrapOnly],['Обе услуги',s.both]],subtitle:'Три непересекающиеся группы'},
     {title:'Источники исследования',type:'donut',items:s.sources,subtitle:'Уникальные точки после сверки'},
     area === 'region'
-      ? {title:'География точек',type:'bars',items:topCities,subtitle:'Количество точек по населенным пунктам'}
+      ? {title:'География точек',type:'bars',items:topCities,subtitle:'Количество точек по населённым пунктам'}
       : {title:'Доступность телефона',type:'donut',items:[['Телефон указан',s.phones],['Без телефона',s.total-s.phones]]},
   ];
-  return hero('Рыночная обстановка', 'Выборка по 2ГИС и Яндекс Картам. Охват частичный.') +
+  return hero('Рыночная обстановка', 'Квалификация рынка, услуги и открытые цены') +
     `<section class="metric-grid">${cards.map(metric).join('')}</section>
     <section class="block"><header class="block-head"><div><h2>Структура рынка</h2><p>Исследованные точки оклейки и тонировки · ${esc(view().label)}</p></div></header>
       <div class="chart-grid">${charts.map(chart).join('')}</div></section>
     <section class="card block">
-      <h2>Опубликованные цены на работы</h2><p class="scope-note">${num(s.pricePositions)} поз. у ${num(s.withAmounts)} точек. Диапазоны включают позиции с указанным объемом работ. Цены без уточненного объема доступны в карточках.</p>
+      <h2>Опубликованные цены на работы</h2><p class="scope-note">${num(s.pricePositions)} поз. у ${num(s.withAmounts)} точек. Диапазоны отражают опубликованные цены, объём работ и комплектация внутри групп могут различаться.</p>
       <div class="table-wrap"><table class="range-table"><thead><tr><th>Работы</th><th class="numeric">Нижняя цена</th><th class="numeric">Верхняя цена</th><th class="numeric">Позиций</th><th class="numeric">Из них «от»</th></tr></thead>
       <tbody>${s.prices.map(item => `<tr><td>${esc(item.label)}</td><td class="numeric">${money(item.low)}</td><td class="numeric">${money(item.high)}</td><td class="numeric">${num(item.count)}</td><td class="numeric">${num(item.fromCount)}</td></tr>`).join('')}</tbody></table></div>
     </section>
-    <section class="card block honeycomb"><div class="block-head"><div><h2>Работа с компаниями</h2><p>Откройте список компаний с контактами из исследования. Этапы и история работы доступны после входа в CRM.</p></div>
-    <a class="button primary" href="#crm" data-section="crm">Открыть ЛИДы и СРМ</a></div></section>`;
+    <section class="card block honeycomb"><div class="block-head"><div><h2>Работа с компаниями</h2><p>Откройте публичную выборку. Полный набор карточек доступен в Google Таблице и CRM.</p></div>
+    <a class="button primary" href="#crm" data-section="crm">Открыть ЛИДы и СРМ</a><a class="button secondary" href="${esc(DATA.researchUrl)}" target="_blank" rel="noopener">Google Таблица ↗</a></div></section>`;
 }
 
 function model() {
@@ -502,9 +809,9 @@ function basketSettings() {
   const field = (key, label, value, name = label) => `<label class="field"><span>${label}</span>
     <input type="number" id="${key}" data-basket-key="${key}" aria-label="${name}" value="${value}" min="0" max="10000000"
       step="${key === 'target' ? '1' : 'any'}" inputmode="${key === 'target' ? 'numeric' : 'decimal'}"></label>`;
-  const editor = ([label, key]) => `<fieldset class="basket-product"><legend>${label} пленка</legend>
-    ${field(key + 'Qty', 'Рулонов на точку', basket[key + 'Qty'], label + ' пленка, рулонов на точку')}
-    ${field(key + 'Price', 'Цена рулона, ₽', basket[key + 'Price'], label + ' пленка, цена рулона в рублях')}
+  const editor = ([label, key]) => `<fieldset class="basket-product"><legend>${label} плёнка</legend>
+    ${field(key + 'Qty', 'Рулонов на точку', basket[key + 'Qty'], label + ' плёнка, рулонов на точку')}
+    ${field(key + 'Price', 'Цена рулона, ₽', basket[key + 'Price'], label + ' плёнка, цена рулона в рублях')}
   </fieldset>`;
   return `<section class="card basket-settings" aria-labelledby="basket-settings-title">
     <div class="card-head"><h3 id="basket-settings-title">Параметры корзины</h3><p class="fine">Цены и количество рулонов можно менять вручную</p></div>
@@ -544,31 +851,7 @@ function areaUrl(nextArea, section) {
   return url.href;
 }
 
-let frameReady = false;
 let lastLocation;
-
-function prepareCrmFrame() {
-  if (frame) return;
-  const url = new URL('cabinet.html#public-leads', location.href);
-  url.searchParams.set('area', area);
-  url.searchParams.set('v', DATA.revision);
-  frame = document.createElement('iframe');
-  frame.title = 'Список ЛИДов и рабочие разделы CRM Московской области';
-  frame.className = 'crm-frame';
-  frame.src = url.href;
-  frame.addEventListener('load', () => {
-    frameReady = true;
-    document.getElementById('crmLoading').hidden = true;
-    sendCrmScope(false);
-  });
-  crmTab.append(frame);
-}
-
-function sendCrmScope(openCatalog) {
-  if (location.protocol !== 'file:') {
-    frame.contentWindow?.postMessage({type:'fiverox:research-area', area, openCatalog}, location.origin);
-  }
-}
 
 function render() {
   const section = getSection();
@@ -583,12 +866,9 @@ function render() {
     if (node.dataset.section === section) node.setAttribute('aria-current', 'page');
   });
   main.hidden = section === 'crm';
-  const wasCrmHidden = crmTab.hidden;
   crmTab.hidden = section !== 'crm';
   if (section === 'crm') {
-    prepareCrmFrame();
-    document.getElementById('crmLoading').hidden = frameReady;
-    if (frameReady) sendCrmScope(wasCrmHidden);
+    renderCatalog();
     return;
   }
   main.innerHTML = {market, leads, model}[section]();
@@ -620,13 +900,6 @@ document.addEventListener('click', event => {
 });
 window.addEventListener('popstate', syncLocation);
 window.addEventListener('hashchange', syncLocation);
-window.addEventListener('message', event => {
-  if (!frame || event.source !== frame.contentWindow || event.origin !== location.origin || getSection() !== 'crm') return;
-  const message = event.data;
-  if (message?.type !== 'fiverox:public-lead-area' || !Object.hasOwn(DATA.views, message.area) || message.area === area) return;
-  history.pushState(null, '', areaUrl(message.area, 'crm'));
-  syncLocation();
-});
 document.querySelector('.skip').addEventListener('click', event => {
   event.preventDefault();
   const content = getSection() === 'crm' ? crmTab : main;
@@ -680,14 +953,6 @@ main.addEventListener('click', async event => {
 });
 lastLocation = location.href;
 render();
-const crmLink = document.querySelector('.sections [data-section="crm"]');
-crmLink.addEventListener('pointerenter', prepareCrmFrame, {once:true});
-crmLink.addEventListener('focus', prepareCrmFrame, {once:true});
-window.addEventListener('load', () => {
-  if (navigator.connection?.saveData || /(^|-)2g$/.test(navigator.connection?.effectiveType || '')) return;
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(prepareCrmFrame, {timeout:1200});
-  else setTimeout(prepareCrmFrame, 350);
-}, {once:true});
 
 })();</script>
   <!-- Copyright 2021 The Onest Project Authors (https://github.com/googlefonts/onest)
