@@ -1,4 +1,4 @@
-name: Read registered passenger cars from both regional tables
+name: Check published Moscow economic dashboard in Chrome
 on:
   push:
     branches: ['qa/moscow-economy-2026']
@@ -6,40 +6,113 @@ permissions: {}
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 4
+    timeout-minutes: 7
     steps:
-      - name: Select units and read annual values
+      - name: Read live pages and compare both territories at two screen sizes
         shell: bash
         run: |
-          python3 -m venv "$RUNNER_TEMP/moscow-tables"
-          "$RUNNER_TEMP/moscow-tables/bin/pip" -q install selenium==4.32.0
-          "$RUNNER_TEMP/moscow-tables/bin/python" - <<'PY'
-          import re, time
+          python3 -m venv "$RUNNER_TEMP/moscow-check"
+          "$RUNNER_TEMP/moscow-check/bin/pip" -q install selenium==4.32.0
+          "$RUNNER_TEMP/moscow-check/bin/python" - <<'PY'
+          import os, json, hashlib, time
+          from urllib.request import Request, urlopen
           from selenium import webdriver
           from selenium.webdriver.common.by import By
-          from selenium.webdriver.support.ui import WebDriverWait, Select
-          opt=webdriver.ChromeOptions()
-          opt.add_argument('--headless=new'); opt.add_argument('--disable-dev-shm-usage')
-          opt.page_load_strategy='eager'
-          b=webdriver.Chrome(options=opt); b.set_page_load_timeout(25); b.set_window_size(1400,1050)
+          from selenium.webdriver.support.ui import WebDriverWait
+          
+          base = 'https://locanilia377-commits.github.io/fiverox-moscow-mo-market-2026/'
+          stamp = os.environ['GITHUB_RUN_ID']
+          revision = 'moscow-mo-20261128-r16'
+          expected = {"index.html":"98e6e6a5570103b4d996943a8d583f956f711332f0cd47a269c1ed23bd15f4c4","data.json":"60458627ee0cebf25fe86d6529e04323f1d9da86d6ba35c333f6c75c717064f3","version.json":"a69ed45bb684b3b4de3bae82c5603754679376cacad55e9f7ee940533a16191b","economy-2025-2026.html":"fcc237c08838ee23414a5a739569e5f8a714ca89f142954e654fd25b3760492f"}
+          def get(path, attempt=0):
+              target = base + path + '?v=' + revision + '&audit=' + stamp + '-' + str(attempt)
+              with urlopen(Request(target, headers={'Cache-Control':'no-cache'}), timeout=16) as response:
+                  assert response.status == 200
+                  return response.read()
+          
+          for attempt in range(30):
+              try:
+                  if json.loads(get('version.json',attempt))['version'] == revision:
+                      break
+              except Exception as error:
+                  print(type(error).__name__, flush=True)
+              time.sleep(4)
+          else:
+              raise RuntimeError('new version not served')
+          for path, digest in expected.items():
+              content = get(path,attempt)
+              assert hashlib.sha256(content).hexdigest() == digest, path
+              print('anonymous GET 200', path, len(content), flush=True)
+              if path == 'data.json':
+                  source = json.loads(content)
+          
+          opts = webdriver.ChromeOptions()
+          for opt in ('--headless=new', '--no-sandbox','--disable-dev-shm-usage', '--force-device-scale-factor=1'):
+              opts.add_argument(opt)
+          driver = webdriver.Chrome(options=opts)
+          driver.set_page_load_timeout(32)
+          wait = WebDriverWait(driver,14)
+          def norm(text):
+              return ' '.join(text.split())
+          def rendered_metric_table():
+              return driver.execute_script("""
+                  return Object.fromEntries([...document.querySelectorAll('.economy-table tbody tr')].map(tr=>[
+                    tr.querySelector('th strong').textContent, [
+                    [...tr.querySelectorAll('td.numeric')].map(td=>td.textContent.trim()),
+                    [...tr.querySelectorAll('th a')].map(a=>a.href)]]));
+              """)
+          def ru(value):
+              return driver.execute_script("return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(arguments[0]);",value)
+          def check_scope(area,width):
+              view = source['views'][area]
+              wait.until(lambda d:d.find_element(By.CSS_SELECTOR,'#main h1').text.strip()==view['territory'])
+              rows=rendered_metric_table()
+              metrics=[m for g in view['market'] for m in g['metrics']]+[source['economyContext']['programPopulation'][area]]
+              assert len(metrics)==len(rows), (area,len(rows),len(metrics))
+              for m in metrics:
+                  cells, links=rows[m['label']]
+                  assert len(links)==len(m['sources']) and all(u.startswith('https://') for u in links), (area,m['id'],links)
+                  for i,num in enumerate(m['values']):
+                      explicit=m.get('displayValues',[None,None])[i]
+                      if explicit: reference=explicit
+                      elif num is None: reference='—'
+                      elif m['id']=='population' and m['approx'][i]: reference='≈ '+ru(num/1e6)+' млн'
+                      else: reference=('≈ ' if m['approx'][i] else '')+ru(num)
+                      assert norm(cells[i])==norm(reference), (area,m['id'],i,cells,reference)
+                  if 'changeLabel' in m: assert norm(cells[2])==norm(m['changeLabel'])
+              assert sorted([x.text for x in driver.find_elements(By.CSS_SELECTOR,'.economy-ring h3')])==['2025','2026']
+              assert len(driver.find_elements(By.CSS_SELECTOR,'.economy-tile'))==4
+              assert driver.find_element(By.CSS_SELECTOR,'.economy-mix .fine').text.startswith(view['territory'])
+              assert len(driver.find_elements(By.CSS_SELECTOR,'.economy-ring'))==2
+              assert norm(rows['Покупательная способность дохода'][0][-1])==('+'+'9,54%' if area=='moscow' else '-0,26%')
+              assert norm(rows['Доля легковых старше 10 лет'][0][-1])==('-4,7 п. п.' if area=='moscow' else '—')
+              assert driver.execute_script('return document.documentElement.scrollWidth <= window.innerWidth + 1'), [area,width,driver.execute_script('return [document.documentElement.scrollWidth,window.innerWidth]')]
+              print('dashboard',width,area,'metrics',len(rows),'rings',2,flush=True)
           try:
-              for geo in ('77','50'):
-                  url=f'https://statbase.ru/data/ru{geo}-number-of-passenger-cars-by-region-national-stat/'
-                  try:
-                      b.get(url)
-                      w=WebDriverWait(b,20)
-                      ctl=w.until(lambda d:d.find_element(By.ID,'cdp-unit-scale'))
-                      print('Scale',geo,[(o.text,o.get_attribute('value')) for o in Select(ctl).options],flush=True)
-                      Select(ctl).select_by_visible_text('ед.')
-                      for label in b.find_elements(By.XPATH,"//*[normalize-space(text())='Таблица']"):
-                          if label.is_displayed():
-                              try: label.click(); break
-                              except Exception: pass
-                      w.until(lambda d: d.execute_script("return [...document.querySelectorAll('table')].some(t=>t.textContent.includes('2024'))"))
-                      print('PUBLIC-PARK-ROWS',geo,b.execute_script("return [...document.querySelectorAll('tr')].map(r=>r.innerText.replace(/\\s+/g,' ')).filter(s=>/(?:2024|2025)/.test(s)).slice(0,12)"),flush=True)
-                  except Exception as err:
-                      print('Public table',geo,str(err)[:150],flush=True)
-                      print('VISIBLE-ITEMS',geo,b.execute_script("return [...document.querySelectorAll('table, tr, button, [role=tab], [class*=data-table]')].filter(r=>r.offsetWidth).slice(0,60).map(r=>r.innerText.slice(0,140))"),flush=True)
-                      print('SOURCE-DATA',geo,b.execute_script("return [...document.querySelectorAll('script:not([src])')].filter(e=>/2024|4191065|3209074/.test(e.textContent)).map(e=>e.textContent.match(/.{0,75}(?:4191065|3209074|2024).{0,130}/g)?.slice(-5))"),flush=True)
-          finally: b.quit()
+              for width,height in [(1440,1120),(390,844)]:
+                  driver.set_window_size(width,height)
+                  driver.execute_cdp_cmd('Emulation.setDeviceMetricsOverride', {'width':width,'height':height,'deviceScaleFactor':1,'mobile':width<600})
+                  driver.get(base+'?area=region&v='+revision+'&audit='+stamp+'#market')
+                  check_scope('region',width)
+                  link=driver.find_element(By.CSS_SELECTOR,'.territories [data-area="moscow"]')
+                  driver.execute_script("arguments[0].scrollIntoView({block:'center'});",link)
+                  link.click()
+                  check_scope('moscow',width)
+                  assert '#market' in driver.current_url and 'area=moscow' in driver.current_url
+                  for area in ('region','moscow'):
+                      driver.get(base+'economy-2025-2026.html?v='+revision+'#'+area)
+                      article=wait.until(lambda d:d.find_element(By.ID,area) if d.find_element(By.ID,area).is_displayed() else False)
+                      assert 'Покупательная способность дохода' in article.text
+                      assert 'Регистрации новых легковых за десять месяцев' in article.text
+                      assert len(article.find_elements(By.CSS_SELECTOR,'tbody th[scope=row]'))==(18 if area=='region' else 17)
+                      assert driver.execute_script('return document.documentElement.scrollWidth <= window.innerWidth + 1'), ('standalone overflow',area,width,driver.execute_script('return [document.documentElement.scrollWidth,window.innerWidth]'))
+                      print('standalone',width,area,flush=True)
+              driver.get(base+'?area=region&v='+revision+'#leads')
+              wait.until(lambda d:'Рыночная обстановка' in d.find_element(By.ID,'main').text)
+              assert not driver.find_elements(By.CSS_SELECTOR,'#main a[href*="docs.google.com/spreadsheets"]')
+              driver.get(base+'?area=region&v='+revision+'#crm')
+              wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR,'#crmTab [data-crm-route]'))==14)
+              print('market and CRM regressions passed',flush=True)
+          finally:
+              driver.quit()
           PY
