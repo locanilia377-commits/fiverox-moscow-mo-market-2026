@@ -1,0 +1,65 @@
+name: Check published Moscow economic sources
+on:
+  push:
+    branches: ['qa/moscow-economy-2026']
+permissions: {}
+jobs:
+  sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Read public statistical tables
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/regional-data"
+          "$RUNNER_TEMP/regional-data/bin/pip" -q install requests beautifulsoup4
+          "$RUNNER_TEMP/regional-data/bin/python" - <<'PY'
+          import gzip, csv, io, re, urllib.parse, concurrent.futures
+          import requests
+          from bs4 import BeautifulSoup
+          def get(url):
+              r=requests.get(url,timeout=(7,20)); r.raise_for_status(); return r
+          def stat(code):
+              url=f"https://statbase.ru/data/ru{code}-number-of-passenger-cars-by-region-national-stat/"
+              r=get(url); raw=r.content.decode('utf8'); soup=BeautifulSoup(raw,'html.parser')
+              print('PARKPAGE',code,r.status_code,len(raw),flush=True)
+              for script in soup.select('script'):
+                  src=script.get('src','')
+                  if src and re.search(r'chart|dataset|statbase|indicator|graph',src,re.I): print('SCRIPT',code,src[:220])
+                  inline=script.get_text() or ''
+                  if '2024' in inline and '2025' in inline:
+                      for patt in ('2024','4191065','3209074'):
+                          for match in list(re.finditer(patt,inline))[-4:]: print('PARKVALUES',code,inline[max(0,match.start()-100):match.start()+100])
+              for tag in soup.select('a[href]'):
+                  href=tag['href']
+                  if ('fedstat' in href or 'gibdd' in href or re.search(r'\.xlsx?|\.csv',href,re.I)): print('PARKLINK',code,href[:300])
+              for s in soup.select('select'): print('PARKSELECT',code,s.get('id'),s.get_text(' ',strip=True)[:180])
+          def basket():
+              root='https://repodesign.econdata.tech/dataset/emiss_31052'
+              slug='/resource/005654be-d1b1-42ac-8522-b7208d03e66f'
+              links=[]
+              for path in (root+slug,root,'https://repository.econdata.tech/dataset/emiss_31052'+slug):
+                  try:
+                      rr=get(path); soup=BeautifulSoup(rr.content,'html.parser')
+                      matches=[urllib.parse.urljoin(path,x['href']) for x in soup.select('a[href]') if re.search(r'\.csv\.gz|\.xls\.zip|/download/|s3\.|storage\.yandex',x['href'])]
+                      print('BASKETPAGE',path,rr.status_code,len(rr.content),matches[:12]); links+=matches
+                  except Exception as ex: print('BASKETPAGE fail',path,str(ex)[:220])
+                  if any('.csv.gz' in l for l in links): break
+              links.extend([root+slug+'/download/31052.csv.gz','https://repository.econdata.tech/dataset/emiss_31052'+slug+'/download/31052.csv.gz'])
+              for link in dict.fromkeys(l for l in links if '.csv.gz' in l):
+                  try:
+                      raw=get(link).content
+                      if not raw.startswith(b'\x1f\x8b'): continue
+                      src=gzip.decompress(raw).decode('utf-8-sig')
+                      print('BASKETFILE',link,repr(src.splitlines()[0])); print('BASKETFIRST',repr(src.splitlines()[1])[:300])
+                      for line in src.splitlines():
+                          if ('Московская область' in line or 'Москва' in line) and ('2025' in line or '2026' in line): print('BASKETROW',line[:500])
+                      break
+                  except Exception as ex: print('BASKETFAIL',link[:130],str(ex)[:140])
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:
+              futures=[ex.submit(stat,'50'),ex.submit(stat,'77'),ex.submit(basket)]
+              for f in futures:
+                  try: f.result()
+                  except Exception as error: print('Source unavailable',str(error)[:230])
+          
+          PY
