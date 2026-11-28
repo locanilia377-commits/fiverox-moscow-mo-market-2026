@@ -80,14 +80,30 @@ jobs:
                           ready.until(lambda b:b.find_element(By.ID,"authScreen").is_displayed())
                           driver.find_element(By.ID,"menuToggle").click()
                           ready.until(lambda b:b.find_element(By.ID,"menuToggle").get_attribute("aria-expanded")=="true")
+                          ready.until(lambda b: b.execute_script("return Math.abs(document.querySelector('#sidebar').getBoundingClientRect().left)<1"))
                           active_links = driver.find_elements(By.CSS_SELECTOR,"#nav [data-screen]")
-                          assert len(active_links)==14 and all(link.is_displayed() for link in active_links)
-                          active_links[-1].click()
+                          state = driver.execute_script("""const side=document.querySelector('#sidebar');return {size:[innerWidth, innerHeight],drawer:[side.clientWidth,side.clientHeight,side.scrollHeight],links:[...side.querySelectorAll('#nav [data-screen]')].map(e=>[e.dataset.screen,getComputedStyle(e).display,getComputedStyle(e).visibility,Math.round(e.getBoundingClientRect().top)])}""")
+                          print(f"{area} mobile drawer {state}",flush=True)
+                          assert [x.get_attribute("data-screen") for x in active_links]==routes, state
+                          assert all(x[1]!="none" and x[2]=="visible" for x in state["links"]), state
+                          last = active_links[-1]
+                          driver.execute_script("arguments[0].scrollIntoView({block:'center',behavior:'instant'});",last)
+                          ready.until(lambda b:b.execute_script("""const e=document.querySelector('#nav [data-screen=coordinator-guide]');const r=e.getBoundingClientRect();return r.top>=0 && r.bottom<=innerHeight+1 && !!document.elementFromPoint(r.x+r.width/2,(r.top+r.bottom)/2)?.closest('[data-screen=coordinator-guide]')"""))
+                          last.click()
                           ready.until(lambda b:b.current_url.endswith("#coordinator-guide"))
                       print(f"{area} {width}px: verified 14 labels, territory, orange highlight, layout and public list focus",flush=True)
           finally:
               driver.quit()
           PY
+      - name: Provide desktop navigation preview
+        if: always()
+        shell: bash
+        run: |
+          if test -s "$RUNNER_TEMP/sidebar-check/region-1440.png"; then
+            echo '::group::Browser preview'
+            python3 -c 'import os,pathlib,base64; p=pathlib.Path(os.environ["RUNNER_TEMP"])/"sidebar-check"/"region-1440.png"; s=base64.b64encode(p.read_bytes()).decode(); [print("SIDEBAR_BROWSER_PNG " + s[i:i+2000]) for i in range(0,len(s),2000)]'
+            echo '::endgroup::'
+          fi
       - name: Save screenshots of the navigation
         if: always()
         uses: actions/upload-artifact@v4
