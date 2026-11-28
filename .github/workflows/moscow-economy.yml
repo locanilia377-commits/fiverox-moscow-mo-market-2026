@@ -1,65 +1,45 @@
-name: Check published Moscow economic sources
+name: Read registered passenger cars from both regional tables
 on:
   push:
     branches: ['qa/moscow-economy-2026']
 permissions: {}
 jobs:
-  sources:
+  verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
-      - name: Read public statistical tables
+      - name: Select units and read annual values
         shell: bash
         run: |
-          python3 -m venv "$RUNNER_TEMP/regional-data"
-          "$RUNNER_TEMP/regional-data/bin/pip" -q install requests beautifulsoup4
-          "$RUNNER_TEMP/regional-data/bin/python" - <<'PY'
-          import gzip, csv, io, re, urllib.parse, concurrent.futures
-          import requests
-          from bs4 import BeautifulSoup
-          def get(url):
-              r=requests.get(url,timeout=(7,20)); r.raise_for_status(); return r
-          def stat(code):
-              url=f"https://statbase.ru/data/ru{code}-number-of-passenger-cars-by-region-national-stat/"
-              r=get(url); raw=r.content.decode('utf8'); soup=BeautifulSoup(raw,'html.parser')
-              print('PARKPAGE',code,r.status_code,len(raw),flush=True)
-              for script in soup.select('script'):
-                  src=script.get('src','')
-                  if src and re.search(r'chart|dataset|statbase|indicator|graph',src,re.I): print('SCRIPT',code,src[:220])
-                  inline=script.get_text() or ''
-                  if '2024' in inline and '2025' in inline:
-                      for patt in ('2024','4191065','3209074'):
-                          for match in list(re.finditer(patt,inline))[-4:]: print('PARKVALUES',code,inline[max(0,match.start()-100):match.start()+100])
-              for tag in soup.select('a[href]'):
-                  href=tag['href']
-                  if ('fedstat' in href or 'gibdd' in href or re.search(r'\.xlsx?|\.csv',href,re.I)): print('PARKLINK',code,href[:300])
-              for s in soup.select('select'): print('PARKSELECT',code,s.get('id'),s.get_text(' ',strip=True)[:180])
-          def basket():
-              root='https://repodesign.econdata.tech/dataset/emiss_31052'
-              slug='/resource/005654be-d1b1-42ac-8522-b7208d03e66f'
-              links=[]
-              for path in (root+slug,root,'https://repository.econdata.tech/dataset/emiss_31052'+slug):
+          python3 -m venv "$RUNNER_TEMP/moscow-tables"
+          "$RUNNER_TEMP/moscow-tables/bin/pip" -q install selenium==4.32.0
+          "$RUNNER_TEMP/moscow-tables/bin/python" - <<'PY'
+          import re, time
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait, Select
+          opt=webdriver.ChromeOptions()
+          opt.add_argument('--headless=new'); opt.add_argument('--disable-dev-shm-usage')
+          opt.page_load_strategy='eager'
+          b=webdriver.Chrome(options=opt); b.set_page_load_timeout(25); b.set_window_size(1400,1050)
+          try:
+              for geo in ('77','50'):
+                  url=f'https://statbase.ru/data/ru{geo}-number-of-passenger-cars-by-region-national-stat/'
                   try:
-                      rr=get(path); soup=BeautifulSoup(rr.content,'html.parser')
-                      matches=[urllib.parse.urljoin(path,x['href']) for x in soup.select('a[href]') if re.search(r'\.csv\.gz|\.xls\.zip|/download/|s3\.|storage\.yandex',x['href'])]
-                      print('BASKETPAGE',path,rr.status_code,len(rr.content),matches[:12]); links+=matches
-                  except Exception as ex: print('BASKETPAGE fail',path,str(ex)[:220])
-                  if any('.csv.gz' in l for l in links): break
-              links.extend([root+slug+'/download/31052.csv.gz','https://repository.econdata.tech/dataset/emiss_31052'+slug+'/download/31052.csv.gz'])
-              for link in dict.fromkeys(l for l in links if '.csv.gz' in l):
-                  try:
-                      raw=get(link).content
-                      if not raw.startswith(b'\x1f\x8b'): continue
-                      src=gzip.decompress(raw).decode('utf-8-sig')
-                      print('BASKETFILE',link,repr(src.splitlines()[0])); print('BASKETFIRST',repr(src.splitlines()[1])[:300])
-                      for line in src.splitlines():
-                          if ('Московская область' in line or 'Москва' in line) and ('2025' in line or '2026' in line): print('BASKETROW',line[:500])
-                      break
-                  except Exception as ex: print('BASKETFAIL',link[:130],str(ex)[:140])
-          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as ex:
-              futures=[ex.submit(stat,'50'),ex.submit(stat,'77'),ex.submit(basket)]
-              for f in futures:
-                  try: f.result()
-                  except Exception as error: print('Source unavailable',str(error)[:230])
-          
+                      b.get(url)
+                      w=WebDriverWait(b,20)
+                      ctl=w.until(lambda d:d.find_element(By.ID,'cdp-unit-scale'))
+                      print('Scale',geo,[(o.text,o.get_attribute('value')) for o in Select(ctl).options],flush=True)
+                      Select(ctl).select_by_visible_text('ед.')
+                      for label in b.find_elements(By.XPATH,"//*[normalize-space(text())='Таблица']"):
+                          if label.is_displayed():
+                              try: label.click(); break
+                              except Exception: pass
+                      w.until(lambda d: d.execute_script("return [...document.querySelectorAll('table')].some(t=>t.textContent.includes('2024'))"))
+                      print('PUBLIC-PARK-ROWS',geo,b.execute_script("return [...document.querySelectorAll('tr')].map(r=>r.innerText.replace(/\\s+/g,' ')).filter(s=>/(?:2024|2025)/.test(s)).slice(0,12)"),flush=True)
+                  except Exception as err:
+                      print('Public table',geo,str(err)[:150],flush=True)
+                      print('VISIBLE-ITEMS',geo,b.execute_script("return [...document.querySelectorAll('table, tr, button, [role=tab], [class*=data-table]')].filter(r=>r.offsetWidth).slice(0,60).map(r=>r.innerText.slice(0,140))"),flush=True)
+                      print('SOURCE-DATA',geo,b.execute_script("return [...document.querySelectorAll('script:not([src])')].filter(e=>/2024|4191065|3209074/.test(e.textContent)).map(e=>e.textContent.match(/.{0,75}(?:4191065|3209074|2024).{0,130}/g)?.slice(-5))"),flush=True)
+          finally: b.quit()
           PY
