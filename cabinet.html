@@ -23,7 +23,7 @@
 .sidebar{overflow-y:auto;overscroll-behavior:contain}.source-detail a,.public-evidence a,.research-card a{overflow-wrap:anywhere}
 
 @font-face{font-family:Onest;src:url("onest-crm.woff2") format("woff2");font-display:swap}body,button,input,select,textarea{font-family:Onest,Arial,sans-serif}.sidebar{background:#064c40}.btn.primary{background:#087d65}.brand{font-weight:850;letter-spacing:.04em}.brand span{font-size:10px}.scope-note{border-color:#b6daca;background:#edf8f1;color:#1e594c}
-</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261128-sidebar-r13"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}.lead-queue-stats{grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))}.lead-qualification{margin-bottom:16px}.lead-qualification .qualification-controls{margin-bottom:7px}.lead-qualification .meta{margin:0}.qualification-label{display:block;margin:5px 0}.qualification-label .pill{white-space:normal}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
+</style><script>window.FIVEROX_PLATFORM_CONFIG=Object.freeze({"pilotEnabled":true,"backendUrl":"https://script.google.com/macros/s/AKfycby62BsWurJuWLGDvmjA4F6hq93qVamYM9UWZHPf1ibVwUlWFbr4gzkNgG599wRGcjDO/exec","name":"FIVEROX · Москва и Московская область · CRM","organization":"FIVEROX"});</script><meta name="application-version" content="moscow-mo-crm-20261128-sidebar-r14"><style>.geo-selector{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:22px}.geo-selector .meta{font-size:11px}.contact-block{overflow-wrap:anywhere}.toolbar{flex-wrap:wrap}.board{max-width:100%}.lead-queue-stats{grid-template-columns:repeat(auto-fit,minmax(min(145px,100%),1fr))}.lead-qualification{margin-bottom:16px}.lead-qualification .qualification-controls{margin-bottom:7px}.lead-qualification .meta{margin:0}.qualification-label{display:block;margin:5px 0}.qualification-label .pill{white-space:normal}</style><link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <style>.public-catalog { min-width: 0; padding: 24px clamp(14px, 3vw, 32px) 40px; }
 .public-catalog-header h1 { margin: 0 0 16px; font-size: clamp(1.5rem, 3vw, 2rem); }
@@ -491,7 +491,14 @@ async function loadPublicRequestCounts() {
     const city = views?.moscow?.stats?.total;
     if (![region, city].every(n => Number.isSafeInteger(n) && n >= 0)) return;
     publicRequestCounts = {all:region + city, rest:region, city};
-    if (!session) drawNav();
+    if (!session) {
+      const badge = $('nav').querySelector('[data-request-count]');
+      if (!badge) return;
+      const value = count(publicRequestCounts[geoScope]);
+      badge.textContent = value;
+      badge.setAttribute('aria-label','Точек в исследовании: ' + value);
+      badge.hidden = false;
+    }
   } catch { /* Keep navigation available if the public snapshot cannot be loaded. */ }
 }
 const fields=['stage','manager','due','next','last','note','amount','reason'];
@@ -592,7 +599,8 @@ function drawNav() {
     const active = screen === route;
     const caption = route === 'leads' && !session ? 'Точек в исследовании' : label;
     const showCount = Number.isInteger(counts[route]) && (route === 'leads' || counts[route] > 0);
-    const badge = showCount ? `<span class="nav-badge" title="${esc(caption)}" aria-label="${esc(caption)}: ${count(counts[route])}">${count(counts[route])}</span>` : '';
+    const badge = showCount || route === 'leads' ?
+      `<span class="nav-badge" ${route === 'leads' ? 'data-request-count' : ''} title="${esc(caption)}" ${showCount ? `aria-label="${esc(caption)}: ${count(counts[route])}"` : 'hidden'}>${showCount ? count(counts[route]) : ''}</span>` : '';
     return `<button type="button" class="nav-item ${publicRoute?'public ':''}${active?'active':''}" data-action="navigate" data-screen="${route}" ${active?'aria-current="page"':''}>
       <span class="nav-icon" aria-hidden="true">${icon}</span><span>${esc(label)}</span>${badge}</button>`;
   }
